@@ -1,0 +1,74 @@
+/* button start */
+
+.button {
+  display: block;
+  background: var(--button-gradient);
+  border-radius: 6px;
+  padding: 1.2px;
+  transition-duration: 0.3s;
+}
+.button:hover {
+  box-shadow: 1px 1px 5px #888;
+  translate: 0 -2px;
+}
+
+.button:active {
+  filter: hue-rotate(45deg);
+}
+
+.button .button-content {
+  border-radius: inherit;
+  color: #fff;
+  padding: 6px 10px;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  font-weight: 500;
+}
+
+.button.btn-outline .button-content {
+  background-color: #fff;
+  color: #000;
+}
+
+.button.btn-outline .button-content span {
+  background: var(--button-gradient);
+  background-clip: text;
+  color: transparent;
+}
+
+/* button end*/
+
+/* modal start */
+
+.ReactModal__Overlay {
+  opacity: 0;
+  transition: 300ms ease-in-out;
+}
+.ReactModal__Overlay--after-open {
+  opacity: 1;
+}
+
+.ReactModal__Overlay--before-close {
+  opacity: 0;
+}
+
+.ReactModal__Content {
+  translate: 0 -20px;
+  transition: 300ms ease-in-out;
+  scale: 1.2;
+}
+
+.ReactModal__Content--after-open {
+  translate: 0 0px;
+  scale: 1;
+}
+
+.ReactModal__Content--before-close {
+  translate: 0 20px;
+  scale: 1.2;
+  filter: blur(4px);
+}
+
+/* modal end */
