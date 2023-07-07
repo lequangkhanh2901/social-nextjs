@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface DrawerProps {
   children: ReactNode
@@ -30,9 +31,9 @@ function Drawer({
     }, 300)
   }
 
-  return (
+  return createPortal(
     <div
-      className="h-screen w-screen fixed inset-0 z-50 duration-300"
+      className="h-screen w-screen fixed inset-0 z-50 duration-300 backdrop-blur-[1px]"
       style={{
         backgroundColor: isShow ? '#80808080' : '#80808000'
       }}
@@ -47,12 +48,13 @@ function Drawer({
           width: `min(85% , ${width})`
         }}
         onClick={(e) => {
-          e.preventDefault()
+          e.stopPropagation()
         }}
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

@@ -13,7 +13,7 @@ function AdminLayout({ children }: { children: ReactElement }) {
         <div className="grow">
           <Header />
 
-          <div className="p-2 max-w-[1440px] mx-auto">{children}</div>
+          <div className="max-w-[1440px] mx-auto relative">{children}</div>
         </div>
       </div>
     </>
