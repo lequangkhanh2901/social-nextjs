@@ -1,51 +1,93 @@
-import { ReactNode } from 'react'
-import ReactModal from 'react-modal'
+'use client'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface ModalProps {
   isOpen: boolean
-  contentLabel?: string
   children: ReactNode
   shouldCloseOnOverlayClick?: boolean
+  zIndex?: number
+  onClose: () => void
   onRequestClose?: () => void
   onAfterOpen?: () => void
-  onAfterClose?: () => void
 }
 
 function Modal({
   isOpen,
-  contentLabel,
   children,
   shouldCloseOnOverlayClick,
-  onRequestClose,
-  onAfterOpen,
-  onAfterClose
+  zIndex = 60,
+  onClose,
+  onAfterOpen
 }: ModalProps) {
-  return (
-    <ReactModal
-      isOpen={isOpen}
-      contentLabel={contentLabel}
-      closeTimeoutMS={300}
-      shouldCloseOnOverlayClick={shouldCloseOnOverlayClick}
-      onRequestClose={onRequestClose}
-      onAfterOpen={onAfterOpen}
-      onAfterClose={onAfterClose}
+  const [isLoaded, setIsloaded] = useState(false)
+  const [isStarted, setIsStarted] = useState(false)
+  const [isBeforeClose, setIsbeforeClose] = useState(false)
+  const [isActive, setIsActive] = useState(isOpen)
+  const [opacity, setOpacity] = useState(0)
+
+  useEffect(() => {
+    setIsloaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsActive(isOpen)
+      setIsStarted(true)
+      onAfterOpen && onAfterOpen()
+    }
+
+    return () => {
+      if (isOpen) {
+        setTimeout(() => {
+          setIsStarted(false)
+          setIsbeforeClose(false)
+          setIsActive(false)
+        }, 300)
+      }
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (isBeforeClose) {
+      setOpacity(0)
+    } else {
+      if (isStarted) {
+        setOpacity(1)
+      }
+    }
+  }, [isBeforeClose, isStarted])
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (shouldCloseOnOverlayClick) {
+      setIsbeforeClose(true)
+      setTimeout(() => {
+        onClose()
+      }, 300)
+    }
+  }
+
+  if (!isLoaded || !isActive) return null
+
+  return createPortal(
+    <div
+      className={`fixed inset-0 bg-[#11111155] backdrop-blur-[1px] flex items-center justify-center duration-300 opacity-0`}
+      onClick={(e) => handleOverlayClick(e)}
       style={{
-        overlay: {
-          backgroundColor: '#11111155',
-          backdropFilter: 'blur(4px)',
-          zIndex: 60,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 4
-        },
-        content: {
-          position: 'static'
-        }
+        zIndex: zIndex,
+        opacity: opacity
       }}
     >
-      {children}
-    </ReactModal>
+      <div
+        className="bg-common-white p-2 rounded-lg shadow-md"
+        onClick={(e) => {
+          e.stopPropagation()
+        }}
+      >
+        {children}
+      </div>
+    </div>,
+    document.body
   )
 }
 

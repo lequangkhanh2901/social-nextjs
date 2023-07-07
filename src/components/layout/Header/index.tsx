@@ -39,11 +39,7 @@ function Header() {
         </div>
       </header>
       {isShowDrawer && (
-        <Drawer
-          show={isShowDrawer}
-          setShow={handleShowDrawer}
-          placement="right"
-        >
+        <Drawer show={isShowDrawer} setShow={handleShowDrawer} placement="left">
           <div>text</div>
         </Drawer>
       )}

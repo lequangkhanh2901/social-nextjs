@@ -107,10 +107,10 @@ function Input({
       if (rules) {
         let result = ''
         for (const key in rules) {
-          result = handleRules[key as keyof InputRules](
+          result = handleRules[key as keyof typeof handleRules](
             val,
-            // ignore it, fix in future
-            rules[key]
+            // ignore it, fix in future, just ts type error
+            rules[key as keyof typeof handleRules]
           )
           if (result) {
             setErrorMessage(result)

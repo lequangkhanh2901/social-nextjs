@@ -1,12 +1,12 @@
 'use client'
-import { createContext, useContext, useState } from 'react'
-import Modal from 'react-modal'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { usePathname } from 'next/navigation'
 
 import '~/app/style/globals.css'
 
 import { GlobalTheme } from '~/helper/enum/common'
+import { DATA_THEME } from '~/settings/constants'
 
 interface ThemeData {
   theme: GlobalTheme
@@ -22,8 +22,6 @@ export const ThemeContext = createContext<ThemeData>({
 
 export const useThemeContext = () => useContext(ThemeContext)
 
-Modal.setAppElement('#modal-root')
-
 export default function RootLayout({
   children
 }: {
@@ -34,8 +32,16 @@ export default function RootLayout({
   const pathname = usePathname()
 
   const changeTheme = (data: GlobalTheme) => {
+    localStorage.setItem(DATA_THEME, data)
     setTheme(data)
   }
+
+  useEffect(() => {
+    const theme = localStorage.getItem(DATA_THEME)
+    if (theme && Object.values(GlobalTheme).includes(theme as GlobalTheme)) {
+      setTheme(theme as GlobalTheme)
+    }
+  }, [])
 
   return (
     <ThemeContext.Provider value={{ theme, changeTheme }}>
@@ -75,7 +81,6 @@ export default function RootLayout({
               }
             }}
           />
-          <div id="modal-root"></div>
         </body>
       </html>
     </ThemeContext.Provider>
