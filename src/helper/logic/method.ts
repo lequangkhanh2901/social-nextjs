@@ -6,3 +6,10 @@ export const generateKey = (num: number) => {
   }
   return key
 }
+
+export const updateSearchParam = (key: string, value: string) => {
+  const searchParams = new URLSearchParams(window.location.search)
+  searchParams.set(key, value)
+
+  return searchParams.toString()
+}

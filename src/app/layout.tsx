@@ -1,12 +1,21 @@
 'use client'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useState
+} from 'react'
 import { Toaster } from 'react-hot-toast'
-import { usePathname } from 'next/navigation'
+import ReactModal from 'react-modal'
 
 import '~/app/style/globals.css'
 
+import { DATA_LANG, DATA_THEME } from '~/settings/constants'
 import { GlobalTheme } from '~/helper/enum/common'
-import { DATA_THEME } from '~/settings/constants'
+import { updateSearchParam } from '~/helper/logic/method'
+import { dictionaries } from '~/locales'
 
 interface ThemeData {
   theme: GlobalTheme
@@ -29,12 +38,20 @@ export default function RootLayout({
 }) {
   const [theme, setTheme] = useState<GlobalTheme>(GlobalTheme.LIGHT)
 
+  const lang = useSearchParams().get('lang')
+  const router = useRouter()
   const pathname = usePathname()
 
-  const changeTheme = (data: GlobalTheme) => {
-    localStorage.setItem(DATA_THEME, data)
-    setTheme(data)
-  }
+  useLayoutEffect(() => {
+    if (!lang || !Object.keys(dictionaries.locales).includes(lang)) {
+      const localLang = localStorage.getItem(DATA_LANG)
+      const searchParams = updateSearchParam(
+        'lang',
+        localLang || dictionaries.defaultLocale
+      )
+      router.replace(`${pathname}?${searchParams}`)
+    }
+  }, [pathname, lang])
 
   useEffect(() => {
     const theme = localStorage.getItem(DATA_THEME)
@@ -43,9 +60,16 @@ export default function RootLayout({
     }
   }, [])
 
+  const changeTheme = (data: GlobalTheme) => {
+    localStorage.setItem(DATA_THEME, data)
+    setTheme(data)
+  }
+
+  ReactModal.setAppElement('#data-modal')
+
   return (
     <ThemeContext.Provider value={{ theme, changeTheme }}>
-      <html lang={pathname.slice(1, 3) || 'en'} data-theme={theme}>
+      <html lang={lang || dictionaries.defaultLocale} data-theme={theme}>
         <body className="text-txt-primary">
           {children}
           <Toaster
@@ -81,6 +105,7 @@ export default function RootLayout({
               }
             }}
           />
+          <div id="data-modal"></div>
         </body>
       </html>
     </ThemeContext.Provider>

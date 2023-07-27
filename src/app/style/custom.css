@@ -45,6 +45,7 @@
 .ReactModal__Overlay {
   opacity: 0;
   transition: 300ms ease-in-out;
+  backdrop-filter: blur(1px);
 }
 .ReactModal__Overlay--after-open {
   opacity: 1;
@@ -58,17 +59,22 @@
   translate: 0 -20px;
   transition: 300ms ease-in-out;
   scale: 1.2;
+  border: none;
+  background-color: var(--background-primary);
+  background-color: red;
 }
 
 .ReactModal__Content--after-open {
   translate: 0 0px;
   scale: 1;
+  border: none;
 }
 
 .ReactModal__Content--before-close {
   translate: 0 20px;
   scale: 1.2;
   filter: blur(4px);
+  border: none;
 }
 
 /* modal end */

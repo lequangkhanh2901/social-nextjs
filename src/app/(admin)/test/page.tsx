@@ -7,7 +7,7 @@ function Test() {
   return (
     <div>
       Text
-      <Link href="/en/dashboard">dashboard</Link>
+      <Link href="/dashboard">dashboard</Link>
       <Button title="toast" onClick={() => toast.error('error')} />
     </div>
   )
