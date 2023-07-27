@@ -2,9 +2,24 @@ import * as en from './en'
 import * as vi from './vi'
 
 export const dictionaries = {
-  en,
-  vi
+  defaultLocale: 'en',
+  locales: {
+    en,
+    vi
+  },
+  languages: [
+    {
+      key: 'en',
+      label: 'EN'
+    },
+    {
+      key: 'vi',
+      label: 'VI'
+    }
+  ]
 }
 
+export const DEFAULT_LOCALE = 'en'
+
 export const getDictionary = (locale: string) =>
-  dictionaries[locale as keyof typeof dictionaries]
+  dictionaries.locales[locale as keyof typeof dictionaries.locales]

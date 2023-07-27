@@ -4,16 +4,18 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
 
-import { getDictionary } from '~/locales'
+import { dictionaries, getDictionary } from '~/locales'
 
 import Button from '~/components/common/Button'
 import Collapse from '~/components/common/Collpase'
 import Input from '~/components/common/Input'
-import Modal from '~/components/common/Modal'
+import Modal from '~/components/common/Modal/Modal'
 import Loading from '~/components/common/Loading'
+import { useSearchParams } from 'next/navigation'
 
-function Dashboard({ params }: any) {
-  const translate = getDictionary(params.lang || 'en')
+function Dashboard() {
+  const lang = useSearchParams().get('lang')
+  const translate = getDictionary(lang || dictionaries.defaultLocale)
 
   const [isShowModal, setIsShowModal] = useState(false)
 
@@ -28,7 +30,7 @@ function Dashboard({ params }: any) {
 
         <Link href="/en">Home</Link>
 
-        <Link href="/en/test">Test</Link>
+        <Link href="/test">Test</Link>
 
         <Button title="toas" onClick={() => toast.success('hello')} />
         <Button title="toas" onClick={() => setIsShowModal(true)} />
@@ -51,11 +53,10 @@ function Dashboard({ params }: any) {
         <Modal
           isOpen={isShowModal}
           shouldCloseOnOverlayClick
-          onClose={() => {
-            setIsShowModal(false)
-          }}
+          placement="left"
+          onRequestClose={() => setIsShowModal(false)}
         >
-          Test modal
+          <div className="p-6">hello</div>
         </Modal>
       </div>
     </>

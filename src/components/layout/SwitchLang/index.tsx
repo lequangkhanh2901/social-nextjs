@@ -1,8 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { useParams, usePathname, useRouter } from 'next/navigation'
-import { language } from '~/helper/data/common'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+
+import { updateSearchParam } from '~/helper/logic/method'
+import { DATA_LANG } from '~/settings/constants'
+import { dictionaries } from '~/locales'
 
 function SwitchLang() {
   const router = useRouter()
@@ -10,12 +13,10 @@ function SwitchLang() {
   const [isShowSelect, setIsShowSelect] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  const params = useParams()
   const pathname = usePathname()
 
-  // console.log(params)
+  const lang = useSearchParams().get('lang') || dictionaries.defaultLocale
 
-  const localeData = language.find((item) => item.key === params.lang)
   useEffect(() => {
     const handleClickOutSide = (e: MouseEvent) => {
       if (!ref.current?.contains(e.target as Node)) {
@@ -34,21 +35,31 @@ function SwitchLang() {
     }
   }, [isShowSelect])
 
+  useEffect(() => {
+    localStorage.setItem(DATA_LANG, lang)
+  }, [lang])
+
   const handleChange = (key: string) => {
-    if (key !== params.lang) {
-      router.push(pathname.replace(pathname.slice(1, 3), key))
+    if (key !== lang) {
+      const searchParams = updateSearchParam('lang', key)
+      router.replace(`${pathname}?${searchParams}`)
     }
   }
+
+  const label = useMemo(() => {
+    const index = dictionaries.languages.findIndex((item) => item.key === lang)
+    return dictionaries.languages[index].label
+  }, [lang])
 
   return (
     <div
       ref={ref}
       className="relative border border-common-black px-2 py-1 rounded select-none cursor-pointer"
     >
-      <div className="w-6 text-center">{localeData?.label}</div>
+      <div className="w-6 text-center">{label}</div>
       {isShowSelect && (
         <div className="absolute left-0 top-[calc(100%+2px)] w-full shadow-lg bg-common-white rounded ">
-          {language.map((item, index) => (
+          {dictionaries.languages.map((item, index) => (
             <div
               key={index}
               className="px-2 py-1 hover:bg-[#ddd] text-center"

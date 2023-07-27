@@ -12,13 +12,13 @@ const sideBarMenu = [
     key: 2,
     icon: sunIcon,
     label: 'Dashboard',
-    link: '/a'
+    link: '/dashboard'
   },
   {
     key: 3,
     icon: moonIcon,
-    label: 'Dashboard',
-    link: '/b'
+    label: 'Test',
+    link: '/test'
   },
   {
     key: 4,
