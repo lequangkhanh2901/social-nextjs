@@ -69,6 +69,7 @@ function Modal({
       closeTimeoutMS={300}
       onRequestClose={onRequestClose}
       onAfterOpen={onAfterOpen}
+      ariaHideApp={false}
     >
       {children}
     </ReactModal>

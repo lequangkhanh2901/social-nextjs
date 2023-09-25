@@ -1,154 +1,112 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import {
+  HTMLInputTypeAttribute,
+  ReactNode,
+  useEffect,
+  useId,
+  useRef,
+  useState
+} from 'react'
 import Image from 'next/image'
+import { Tooltip } from 'react-tooltip'
 import { useThemeContext } from '~/app/layout'
 
 import hideIcon from '~/public/icons/hide.png'
 import showIcon from '~/public/icons/show.png'
 
-interface InputRules {
-  required?: boolean
-  min?: number
-  max?: number
-  minLength?: number
-  maxLength?: number
-}
-
-interface InputProps {
-  type?: 'text' | 'password' | 'number'
+interface Props {
+  name: string
+  type?: HTMLInputTypeAttribute
   label?: string
-  prefix?: JSX.Element | string
-  subfix?: JSX.Element | string
-  defaultValue?: string
-  placeHolder?: string
-  passClass?: string
+  value: string
+  prefix?: ReactNode
+  subfix?: ReactNode
   error?: string
-  rules?: InputRules
+  placeholder?: string
   disabled?: boolean
+  className?: string
+  inputClassName?: string
+  description?: string
   onChange?: (e: any) => void
 }
 
-function Input({
+export default function Input({
+  name,
   type = 'text',
   label,
+  value,
   prefix,
   subfix,
-  defaultValue = '',
-  placeHolder = '',
-  passClass = '',
   error,
-  rules,
+  placeholder,
   disabled,
+  className = '',
+  inputClassName,
+  description,
   onChange
-}: InputProps) {
-  const [value, setValue] = useState(defaultValue)
+}: Props) {
   const [inputType, setInputType] = useState(type)
-  const [errorMessage, setErrorMessage] = useState(error)
   const [errorHeigh, setErrorHeigh] = useState(0)
 
-  const errorRef = useRef<HTMLParagraphElement>(null)
-
   const id = useId()
-
   const { theme } = useThemeContext()
+
+  const errorRef = useRef<HTMLParagraphElement>(null)
 
   useEffect(() => {
     if (errorRef) {
       setErrorHeigh(errorRef.current?.offsetHeight || 0)
     }
-  }, [errorMessage])
-
-  const handleChange = (val: string) => {
-    if (!disabled) {
-      setValue(val)
-      setErrorMessage('')
-      if (onChange) {
-        onChange(val)
-      }
-    }
-  }
+  }, [error])
 
   const handleClickShowPass = () => {
-    if (inputType === 'password') {
-      setInputType('text')
-    } else {
-      setInputType('password')
-    }
-  }
-
-  const handleRules = {
-    required: (val: string, boo: boolean) => {
-      if (boo && !val) return `${label || 'This field'} is required`
-      return ''
-    },
-    minLength: (val: string, len: number) => {
-      if (val.length < len)
-        return `${label || 'This field'} is must least ${len} character`
-      return ''
-    },
-    maxLength: (val: string, len: number) => {
-      if (val.length > len)
-        return `${label || 'This field'} cann't have more than ${len} character`
-      return ''
-    },
-    min: (val: number | string, num: number) => {
-      if (Number(val) < num)
-        return `${label || 'This field'} is must equal or greater than ${num}`
-      return ''
-    },
-    max: (val: string | number, num: number) => {
-      if (Number(val) > num)
-        return `${label || 'This field'} is must equal or less than ${num}`
-      return ''
-    }
-  }
-
-  const handleBlur = (val: string) => {
-    if (!disabled) {
-      if (rules) {
-        let result = ''
-        for (const key in rules) {
-          result = handleRules[key as keyof typeof handleRules](
-            val,
-            // ignore it, fix in future, just ts type error
-            rules[key as keyof typeof handleRules]
-          )
-          if (result) {
-            setErrorMessage(result)
-            break
-          }
-        }
-      }
-    }
+    if (inputType === 'password') setInputType('text')
+    else setInputType('password')
   }
 
   return (
     <div
-      className={`py-2 ${passClass} ${
+      className={`py-2 ${className} ${
         disabled
           ? 'opacity-40 pointer-events-none select-none cursor-not-allowed'
           : ''
       }`}
     >
       {label && (
-        <label className="text-sm font-semibold py-2 inline-block" htmlFor={id}>
-          {label}
-        </label>
+        <>
+          <label
+            className="text-sm font-semibold py-2 inline-block"
+            htmlFor={id}
+          >
+            {label}
+          </label>
+          {description && (
+            <div
+              data-tooltip-id={`${name}-tooltip-input`}
+              data-tooltip-content={description}
+              className=" ml-1 inline-flex justify-center items-center w-3 h-3 text-[10px] cursor-pointer text-common-black bg-common-white rounded-full border border-common-gray-dark"
+            >
+              ?
+            </div>
+          )}
+        </>
       )}
       <div
-        className={`flex items-center rounded border ${
-          errorMessage ? 'border-common-danger' : ''
+        className={`flex items-center rounded border border-[#808080] focus-within:border-common-purble ${
+          !disabled && error ? 'border-common-danger' : ''
         } p-2 bg-common-white gap-2 duration-300`}
       >
         {prefix && <div>{prefix}</div>}
         <input
           type={inputType}
+          name={name}
           id={id}
+          autoComplete="off"
+          placeholder={placeholder}
           value={value}
-          placeholder={placeHolder}
-          className="outline-none text-txt-gray grow text-sm bg-[transparent]"
-          onChange={(e) => handleChange(e.target.value)}
-          spellCheck="false"
-          onBlur={(e) => handleBlur(e.target.value.trim())}
+          className={`outline-none text-txt-gray grow text-sm bg-[transparent] ${inputClassName}`}
+          spellCheck={false}
+          onChange={onChange}
+          readOnly={disabled}
         />
         {type === 'password' && (
           <Image
@@ -162,7 +120,7 @@ function Input({
         )}
         {subfix && <div>{subfix}</div>}
       </div>
-      {errorMessage && (
+      {!disabled && error && (
         <div
           className={`duration-300 overflow-hidden`}
           style={{
@@ -170,11 +128,12 @@ function Input({
           }}
         >
           <p ref={errorRef} className="text-common-danger text-xs pt-1">
-            {errorMessage}
+            {label || name} {error}
           </p>
         </div>
       )}
+
+      {description && <Tooltip id={`${name}-tooltip-input`} place="right" />}
     </div>
   )
 }
-export default Input

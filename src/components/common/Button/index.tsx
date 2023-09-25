@@ -13,6 +13,8 @@ interface ButtonProps {
   isUrlOutSystem?: boolean
   passClass?: string
   loadding?: boolean
+  type?: string
+  disabled?: boolean
   onClick?: () => void
 }
 
@@ -26,6 +28,8 @@ function Button({
   isUrlOutSystem,
   passClass,
   loadding,
+  type,
+  disabled,
   onClick
 }: ButtonProps) {
   const props: any = {}
@@ -58,9 +62,12 @@ function Button({
       href={href}
       className={`button relative ${renderClass()} ${
         rounded ? 'rounded-full' : ''
-      }`}
+      } ${disabled ? 'opacity-50 pointer-events-none select-none' : ''}`}
       {...props}
-      onClick={onClick}
+      type={type}
+      onClick={() => {
+        if (!disabled && onClick) onClick()
+      }}
     >
       {loadding && (
         <div className="absolute inset-0 bg-[#dddddd88] z-10 rounded-[inherit] flex items-center justify-center">

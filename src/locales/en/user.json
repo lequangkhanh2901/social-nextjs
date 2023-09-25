@@ -1,0 +1,9 @@
+{
+  "name": "Name",
+  "username": "User name",
+  "usernameDesc": "This is username of account, username is unique",
+  "male": "Male",
+  "female": "Female",
+  "other": "Other",
+  "uploadAvatar": "Upload avatar"
+}
