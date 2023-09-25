@@ -1,21 +1,16 @@
 'use client'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useState
-} from 'react'
+
+import { createContext, useContext, useEffect, useState } from 'react'
+import { Provider } from 'react-redux'
 import { Toaster } from 'react-hot-toast'
-import ReactModal from 'react-modal'
+import { useSearchParams } from 'next/navigation'
 
 import '~/app/style/globals.css'
 
-import { DATA_LANG, DATA_THEME } from '~/settings/constants'
+import { DATA_THEME } from '~/settings/constants'
 import { GlobalTheme } from '~/helper/enum/common'
-import { updateSearchParam } from '~/helper/logic/method'
 import { dictionaries } from '~/locales'
+import store from '~/redux/store'
 
 interface ThemeData {
   theme: GlobalTheme
@@ -39,19 +34,6 @@ export default function RootLayout({
   const [theme, setTheme] = useState<GlobalTheme>(GlobalTheme.LIGHT)
 
   const lang = useSearchParams().get('lang')
-  const router = useRouter()
-  const pathname = usePathname()
-
-  useLayoutEffect(() => {
-    if (!lang || !Object.keys(dictionaries.locales).includes(lang)) {
-      const localLang = localStorage.getItem(DATA_LANG)
-      const searchParams = updateSearchParam(
-        'lang',
-        localLang || dictionaries.defaultLocale
-      )
-      router.replace(`${pathname}?${searchParams}`)
-    }
-  }, [pathname, lang])
 
   useEffect(() => {
     const theme = localStorage.getItem(DATA_THEME)
@@ -65,13 +47,11 @@ export default function RootLayout({
     setTheme(data)
   }
 
-  ReactModal.setAppElement('#data-modal')
-
   return (
     <ThemeContext.Provider value={{ theme, changeTheme }}>
       <html lang={lang || dictionaries.defaultLocale} data-theme={theme}>
         <body className="text-txt-primary">
-          {children}
+          <Provider store={store}>{children}</Provider>
           <Toaster
             toastOptions={{
               duration: 2000,

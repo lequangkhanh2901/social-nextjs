@@ -1,5 +1,9 @@
 {
   "login": "Login",
   "logout": "Logout",
-  "signup": "Signup"
+  "signup": "Signup",
+  "serverError": "Server error",
+  "wellcome": "Wellcome to my APP",
+  "success": "Success",
+  "wrongFormat": "Wrong format"
 }

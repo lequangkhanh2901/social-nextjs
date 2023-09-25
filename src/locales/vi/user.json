@@ -1,0 +1,9 @@
+{
+  "name": "Tên",
+  "username": "Tên người dùng",
+  "usernameDesc": "Tên của người dùng, tên này là duy nhất",
+  "male": "Nam",
+  "female": "Nữ",
+  "other": "Khác",
+  "uploadAvatar": "Đăng ảnh đại diện"
+}

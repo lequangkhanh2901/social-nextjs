@@ -1,3 +1,6 @@
-import common from './common.json'
+import tCommon from './common.json'
+import tValidate from './validate.json'
+import tAuth from './auth.json'
+import tUser from './user.json'
 
-export { common }
+export { tCommon, tValidate, tAuth, tUser }

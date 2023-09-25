@@ -1,5 +1,9 @@
 {
   "login": "Đăng nhập",
   "logout": "Đăng xuất",
-  "signup": "Đăng ký"
+  "signup": "Đăng ký",
+  "serverError": "Lỗi hệ thống",
+  "wellcome": "Chào mừng đến với nhà của anh",
+  "success": "Success",
+  "wrongFormat": "Định dạng không đúng"
 }

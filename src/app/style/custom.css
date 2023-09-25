@@ -1,6 +1,7 @@
 /* button start */
 
-.button {
+.button,
+.button[type='submit'] {
   display: block;
   background: var(--button-gradient);
   border-radius: 6px;
