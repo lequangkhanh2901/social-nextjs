@@ -28,9 +28,12 @@ const userSlice = createSlice({
       }
     ) => {
       state.currentUser = { ...state.currentUser, ...action.payload }
+    },
+    clearUser: (state) => {
+      state.currentUser = initUser.currentUser
     }
   }
 })
 
-export const { updateUser, updatePartialUser } = userSlice.actions
+export const { updateUser, updatePartialUser, clearUser } = userSlice.actions
 export default userSlice

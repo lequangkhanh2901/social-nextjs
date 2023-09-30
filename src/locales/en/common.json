@@ -5,5 +5,9 @@
   "serverError": "Server error",
   "wellcome": "Wellcome to my APP",
   "success": "Success",
-  "wrongFormat": "Wrong format"
+  "wrongFormat": "Wrong format",
+  "notification": "Notification",
+  "all": "All",
+  "notRead": "Not read",
+  "message": "Message"
 }

@@ -5,5 +5,9 @@
   "serverError": "Lỗi hệ thống",
   "wellcome": "Chào mừng đến với nhà của anh",
   "success": "Success",
-  "wrongFormat": "Định dạng không đúng"
+  "wrongFormat": "Định dạng không đúng",
+  "notification": "Thông báo",
+  "all": "Tất cả",
+  "notRead": "Chưa đọc",
+  "message": "Tin nhắn"
 }

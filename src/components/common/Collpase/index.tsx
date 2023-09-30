@@ -1,8 +1,8 @@
 import { ReactNode, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 
+import { useThemeContext } from '~/components/layout/Wrapper'
 import ritghArrowIcon from '~/public/icons/rightArrow.png'
-import { useThemeContext } from '~/app/layout'
 
 interface CollapseProps {
   title: string

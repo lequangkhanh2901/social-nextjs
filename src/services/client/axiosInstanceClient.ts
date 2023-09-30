@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { ACCESS_TOKEN, REFRESH_TOKEN, SERVER_API } from '~/settings/constants'
-import { getCookie, setCookie } from '~/untils/clientCookie'
+import { getCookie, removeCookies, setCookie } from '~/untils/clientCookie'
 
 const axiosInstance = axios.create({
   baseURL: SERVER_API,
@@ -49,9 +49,14 @@ axiosInstance.interceptors.response.use(
           ] = `Bearer ${res?.access}`
           originalRequest.headers['Authorization'] = `Bearer ${res?.access}`
           setCookie(ACCESS_TOKEN, res.access)
+          setCookie(REFRESH_TOKEN, res.refresh)
           // setCookie(res?.access)
           // Repeat the original request with the updated headers
           return axiosInstance(originalRequest)
+        })
+        .catch(() => {
+          removeCookies([ACCESS_TOKEN, REFRESH_TOKEN])
+          window.location.href = '/login'
         })
     }
 

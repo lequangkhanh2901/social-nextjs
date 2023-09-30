@@ -1,10 +1,10 @@
 'use client'
 
-import { useLanguage } from '~/helper/hooks/useLangguage'
+import { useLanguageContext } from '~/components/layout/Wrapper'
 import { getDictionary } from '~/locales'
 
 export default function Wellcome() {
-  const lang = useLanguage()
+  const { lang } = useLanguageContext()
 
   const { tCommon } = getDictionary(lang)
 

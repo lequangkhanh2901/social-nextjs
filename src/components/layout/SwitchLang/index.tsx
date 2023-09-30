@@ -1,50 +1,26 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useMemo, useRef, useState } from 'react'
 
-import { updateSearchParam } from '~/helper/logic/method'
-import { DATA_LANG } from '~/settings/constants'
 import { dictionaries } from '~/locales'
+import useClickOutSide from '~/helper/hooks/useClickOutSide'
+import { useLanguageContext } from '../Wrapper'
 
 function SwitchLang() {
-  const router = useRouter()
-
   const [isShowSelect, setIsShowSelect] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  const pathname = usePathname()
+  const { lang, changeLang } = useLanguageContext()
 
-  const lang = useSearchParams().get('lang') || dictionaries.defaultLocale
-
-  useEffect(() => {
-    const handleClickOutSide = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) {
-        if (isShowSelect) {
-          setIsShowSelect(false)
-        }
-      } else {
-        setIsShowSelect(!isShowSelect)
+  useClickOutSide(
+    () => {
+      if (isShowSelect) {
+        setIsShowSelect(false)
       }
-    }
-
-    window.addEventListener('click', handleClickOutSide)
-
-    return () => {
-      window.removeEventListener('click', handleClickOutSide)
-    }
-  }, [isShowSelect])
-
-  useEffect(() => {
-    localStorage.setItem(DATA_LANG, lang)
-  }, [lang])
-
-  const handleChange = (key: string) => {
-    if (key !== lang) {
-      const searchParams = updateSearchParam('lang', key)
-      router.replace(`${pathname}?${searchParams}`)
-    }
-  }
+    },
+    ref,
+    [isShowSelect]
+  )
 
   const label = useMemo(() => {
     const index = dictionaries.languages.findIndex((item) => item.key === lang)
@@ -55,6 +31,7 @@ function SwitchLang() {
     <div
       ref={ref}
       className="relative border border-common-black px-2 py-1 rounded select-none cursor-pointer"
+      onClick={() => setIsShowSelect(!isShowSelect)}
     >
       <div className="w-6 text-center">{label}</div>
       {isShowSelect && (
@@ -63,7 +40,7 @@ function SwitchLang() {
             <div
               key={index}
               className="px-2 py-1 hover:bg-[#ddd] text-center"
-              onClick={() => handleChange(item.key)}
+              onClick={() => changeLang(item.key)}
             >
               {item.label}
             </div>

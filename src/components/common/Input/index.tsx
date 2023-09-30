@@ -1,4 +1,5 @@
 import {
+  ChangeEvent,
   HTMLInputTypeAttribute,
   ReactNode,
   useEffect,
@@ -8,8 +9,9 @@ import {
 } from 'react'
 import Image from 'next/image'
 import { Tooltip } from 'react-tooltip'
-import { useThemeContext } from '~/app/layout'
+import { twMerge } from 'tailwind-merge'
 
+import { useThemeContext } from '~/components/layout/Wrapper'
 import hideIcon from '~/public/icons/hide.png'
 import showIcon from '~/public/icons/show.png'
 
@@ -20,13 +22,15 @@ interface Props {
   value: string
   prefix?: ReactNode
   subfix?: ReactNode
-  error?: string
+  error?: string | boolean
   placeholder?: string
   disabled?: boolean
   className?: string
   inputClassName?: string
+  inputBoxClassName?: string
   description?: string
-  onChange?: (e: any) => void
+  rounded?: boolean
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
 }
 
 export default function Input({
@@ -41,7 +45,9 @@ export default function Input({
   disabled,
   className = '',
   inputClassName,
+  inputBoxClassName = '',
   description,
+  rounded,
   onChange
 }: Props) {
   const [inputType, setInputType] = useState(type)
@@ -91,9 +97,14 @@ export default function Input({
         </>
       )}
       <div
-        className={`flex items-center rounded border border-[#808080] focus-within:border-common-purble ${
-          !disabled && error ? 'border-common-danger' : ''
-        } p-2 bg-common-white gap-2 duration-300`}
+        className={twMerge(
+          `flex items-center ${
+            rounded ? 'rounded-full' : 'rounded'
+          } border border-[#808080] focus-within:border-common-purble ${
+            !disabled && error ? 'border-common-danger' : ''
+          } p-2 bg-common-white gap-2 duration-300`,
+          inputBoxClassName
+        )}
       >
         {prefix && <div>{prefix}</div>}
         <input

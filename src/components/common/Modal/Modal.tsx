@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import ReactModal from 'react-modal'
+import { useThemeContext } from '~/components/layout/Wrapper'
 
 interface ModalProps {
   children: ReactNode
@@ -30,6 +31,8 @@ function Modal({
   onRequestClose,
   onAfterOpen
 }: ModalProps) {
+  const { theme } = useThemeContext()
+
   const renderclass = () => {
     switch (placement) {
       case 'top':
@@ -60,16 +63,17 @@ function Modal({
       isOpen={isOpen}
       shouldCloseOnOverlayClick={shouldCloseOnOverlayClick}
       overlayClassName={`bg-[#00000088] fixed inset-0 flex p-5 ${renderclass()}`}
-      className={`bg-common-white rounded-md`}
+      className={`bg-common-white rounded-md react-modal-${theme}`}
       style={{
         overlay: {
           zIndex
         }
       }}
-      closeTimeoutMS={300}
+      closeTimeoutMS={200}
       onRequestClose={onRequestClose}
       onAfterOpen={onAfterOpen}
       ariaHideApp={false}
+      preventScroll
     >
       {children}
     </ReactModal>

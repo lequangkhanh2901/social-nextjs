@@ -2,9 +2,9 @@
 
 import Image from 'next/image'
 import { GlobalTheme } from '~/helper/enum/common'
-import { useThemeContext } from '~/app/layout'
 import sunIcon from '~/public/icons/sun.png'
 import moonIcon from '~/public/icons/moon.png'
+import { useThemeContext } from '../Wrapper'
 
 function ChangeTheme() {
   const { theme, changeTheme } = useThemeContext()
