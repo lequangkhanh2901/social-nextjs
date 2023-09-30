@@ -7,7 +7,7 @@ import ritghArrowIcon from '~/public/icons/rightArrow.png'
 import Logo from '../Logo'
 import { SideBarMenu } from '~/helper/type/layout'
 import { usePathname, useRouter } from 'next/navigation'
-import { useThemeContext } from '~/app/layout'
+import { useThemeContext } from '../Wrapper'
 
 interface SideBarProps {
   menu: SideBarMenu[]

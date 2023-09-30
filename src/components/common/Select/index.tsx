@@ -1,6 +1,7 @@
-import Image from 'next/image'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useThemeContext } from '~/app/layout'
+import Image from 'next/image'
+
+import { useThemeContext } from '~/components/layout/Wrapper'
 import ritghArrowIcon from '~/public/icons/rightArrow.png'
 
 interface Data {

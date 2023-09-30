@@ -22,7 +22,8 @@ module.exports = {
         warn: '#ff9966',
         gray: {
           dark: 'var(--dark-gray)',
-          light: 'var(--light-gray)'
+          light: 'var(--light-gray)',
+          medium: 'var(--medium-gray)'
         },
         danger: '#f57'
       },

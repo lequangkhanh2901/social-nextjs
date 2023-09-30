@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useFormik } from 'formik'
 
-import { useLanguage } from '~/helper/hooks/useLangguage'
 import { LOGIN_SCHEMA } from '~/helper/schema/auth'
 import { getDictionary } from '~/locales'
 import { postRequest } from '~/services/client/postRequest'
@@ -19,9 +18,11 @@ import {
 
 import Button from '~/components/common/Button'
 import Input from '~/components/common/Input'
+import { useLanguageContext } from '~/components/layout/Wrapper'
 
 export default function LoginForm() {
-  const lang = useLanguage()
+  const { lang } = useLanguageContext()
+
   const [isPosting, setIsPosting] = useState(false)
 
   const router = useRouter()
@@ -74,6 +75,7 @@ export default function LoginForm() {
           onChange={formik.handleChange}
           error={
             formik.errors.email &&
+            formik.touched.email &&
             (tValidate[formik.errors.email as keyof typeof tValidate] ||
               formik.errors.email)
           }
@@ -85,7 +87,9 @@ export default function LoginForm() {
           value={formik.values.password}
           error={
             formik.errors.password &&
-            tValidate[formik.errors.password as keyof typeof tValidate]
+            formik.touched.password &&
+            (tValidate[formik.errors.password as keyof typeof tValidate] ||
+              formik.errors.password)
           }
           onChange={formik.handleChange}
         />

@@ -1,10 +1,12 @@
-html[data-theme='light'] {
+#wrapper-theme[data-theme='light'],
+.react-modal-light {
   --background-primary: #eeeeee;
 
   --white: #ffffff;
   --black: #000000;
-  --dark-gray: #222222;
-  --light-gray: #dddddd;
+  --dark-gray: #444444;
+  --medium-gray: #cccccc;
+  --light-gray: #eeeeee;
   --purble: #a040cc;
 
   --txt-color-primary: #000;
@@ -19,12 +21,14 @@ html[data-theme='light'] {
   );
 }
 
-html[data-theme='dark'] {
+#wrapper-theme[data-theme='dark'],
+.react-modal-dark {
   --background-primary: #000;
 
   --white: #111111;
   --black: #ffffff;
   --dark-gray: #dddddd;
+  --medium-gray: #aaaaaa;
   --light-gray: #222222;
   --purble: #a040cc;
 

@@ -1,3 +1,6 @@
 import { cookies } from 'next/headers'
 
-export const getCookie = (key: string) => cookies().get(key)
+export const getCookie = (key: string) => cookies().get(key)?.value
+
+export const setCookie = (key: string, value: string) =>
+  cookies().set(key, value)

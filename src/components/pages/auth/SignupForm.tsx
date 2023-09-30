@@ -5,7 +5,6 @@ import { toast } from 'react-hot-toast'
 import Image from 'next/image'
 import { useFormik } from 'formik'
 
-import { useLanguage } from '~/helper/hooks/useLangguage'
 import { SIGNUP_SCHEMA } from '~/helper/schema/auth'
 import { getDictionary } from '~/locales'
 import { postRequest } from '~/services/client/postRequest'
@@ -15,12 +14,13 @@ import Input from '~/components/common/Input'
 import Modal from '~/components/common/Modal/Modal'
 
 import succcessImg from '~/public/images/common/success.png'
+import { useLanguageContext } from '~/components/layout/Wrapper'
 
 export default function SignupForm() {
   const [isPosting, setIsPosting] = useState(false)
   const [isSuccess, setIssuccess] = useState(false)
 
-  const lang = useLanguage()
+  const { lang } = useLanguageContext()
   const { tAuth, tValidate, tCommon } = getDictionary(lang)
 
   const formik = useFormik({

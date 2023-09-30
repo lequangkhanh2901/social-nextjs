@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { useState } from 'react'
 
-import { useThemeContext } from '~/app/layout'
+import { useThemeContext } from '../Wrapper'
 import moreIcon from '~/public/icons/more.png'
 import Drawer from '../../common/Drawer'
 import ChangeTheme from '../ChangeTheme'

@@ -3,17 +3,17 @@
 import { useState } from 'react'
 import { useFormik } from 'formik'
 
-import { useLanguage } from '~/helper/hooks/useLangguage'
 import { FORGOT_PASSWORD_SCHEMA } from '~/helper/schema/auth'
 import { getDictionary } from '~/locales'
 
 import Input from '~/components/common/Input'
 import Button from '~/components/common/Button'
+import { useLanguageContext } from '~/components/layout/Wrapper'
 
 export default function ForgotPasswordForm() {
   const [isPosting] = useState(false)
 
-  const lang = useLanguage()
+  const { lang } = useLanguageContext()
   const { tAuth, tValidate } = getDictionary(lang)
 
   const formik = useFormik({

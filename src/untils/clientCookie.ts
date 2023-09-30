@@ -7,3 +7,7 @@ export const setCookie = (
   value: string,
   option?: CookieAttributes
 ) => Cookies.set(key, value, option)
+
+export const removeCookies = (keys: string[]) => {
+  keys.forEach((key) => Cookies.remove(key))
+}
