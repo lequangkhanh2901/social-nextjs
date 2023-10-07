@@ -3,5 +3,10 @@
   "imageVideo": "Ảnh / Video",
   "status": "Trạng thái cảm xúc",
   "post": "Đăng",
-  "pushOrDrag": "Nhấn / kéo thả ảnh & video"
+  "pushOrDrag": "Nhấn / kéo thả ảnh & video",
+  "public": "Công khai",
+  "private": "Riêng tư",
+  "onlyFriend": "Chỉ bạn bè",
+  "postCreated": "Bạn đã tạo một bài đăng!",
+  "viewMore": "Xem thêm"
 }

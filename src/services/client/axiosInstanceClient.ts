@@ -19,6 +19,8 @@ axiosInstance.interceptors.request.use(
   }
 )
 
+let isRefreshed = false
+
 axiosInstance.interceptors.response.use(
   (response: any) => {
     return response?.data
@@ -28,7 +30,8 @@ axiosInstance.interceptors.response.use(
 
     const originalRequest = config
 
-    if (response.status === 401 && !originalRequest._retry) {
+    if (response.status === 401 && !isRefreshed && !originalRequest._retry) {
+      isRefreshed = true
       originalRequest._retry = true
       const tokenRefresh = getCookie(REFRESH_TOKEN)
       // // Refresh the token
@@ -43,13 +46,16 @@ axiosInstance.interceptors.response.use(
           }
         )
         .then((res: any) => {
+          isRefreshed = false
           // Update the token in the headers
           axiosInstance.defaults.headers.common[
             'Authorization'
           ] = `Bearer ${res?.access}`
           originalRequest.headers['Authorization'] = `Bearer ${res?.access}`
           setCookie(ACCESS_TOKEN, res.access)
-          setCookie(REFRESH_TOKEN, res.refresh)
+          setCookie(REFRESH_TOKEN, res.refresh, {
+            expires: 7
+          })
           // setCookie(res?.access)
           // Repeat the original request with the updated headers
           return axiosInstance(originalRequest)

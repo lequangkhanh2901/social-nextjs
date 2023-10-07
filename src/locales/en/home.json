@@ -3,5 +3,10 @@
   "imageVideo": "Image / Video",
   "status": "Emotional status",
   "post": "Post",
-  "pushOrDrag": "Push / drag and drop image & video"
+  "pushOrDrag": "Push / drag and drop image & video",
+  "public": "Public",
+  "private": "Private",
+  "onlyFriend": "Only friend",
+  "postCreated": "You created a post!",
+  "viewMore": "View more"
 }

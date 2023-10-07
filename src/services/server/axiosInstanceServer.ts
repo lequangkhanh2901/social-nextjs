@@ -48,7 +48,7 @@ axiosInstance.interceptors.response.use(
             'Authorization'
           ] = `Bearer ${res?.access}`
           originalRequest.headers['Authorization'] = `Bearer ${res?.access}`
-          setCookie(ACCESS_TOKEN, res.access)
+          setCookie(ACCESS_TOKEN, res.access, { expires: 7 })
           setCookie(REFRESH_TOKEN, res.refresh)
           // setCookie(res?.access)
           // Repeat the original request with the updated headers

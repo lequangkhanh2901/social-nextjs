@@ -3,11 +3,13 @@ import Image, { StaticImageData } from 'next/image'
 export default function Avatar({
   src,
   width,
-  alt = ''
+  alt = '',
+  className = ''
 }: {
   src: string | StaticImageData
   width: number
   alt?: string
+  className?: string
 }) {
   return (
     <Image
@@ -23,7 +25,7 @@ export default function Avatar({
         width: width,
         height: width
       }}
-      className="rounded-full object-cover"
+      className={`rounded-full object-cover border border-common-gray-light hover:border-common-gray-medium ${className}`}
     />
   )
 }
