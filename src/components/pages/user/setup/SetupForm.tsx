@@ -50,8 +50,10 @@ export default function MainSetup() {
         await putRequest('/user', { name, username, sex })
         toast.success(tCommon.success)
         setStep('avatar')
-      } catch (error) {
-        toast.error(tCommon.serverError)
+      } catch (error: any) {
+        if (error.response.data.message === 'EXISTED_USERNANE')
+          toast.error('EXISTED_USERNANE')
+        else toast.error(tCommon.serverError)
       }
       setIsPosting(false)
     }

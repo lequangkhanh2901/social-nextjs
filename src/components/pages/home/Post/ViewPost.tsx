@@ -14,6 +14,8 @@ import Modal from '~/components/common/Modal/Modal'
 import Video from '~/components/common/Video'
 
 import dot from '~/public/icons/dots.svg'
+import likeActive from '~/public/icons/home/like_active.svg'
+import messageActive from '~/public/icons/message_active.svg'
 
 import Actions from './Actions'
 import Comments, { CommentsRef } from './Comments'
@@ -50,48 +52,73 @@ export default function ViewPost({ post, onClose, setPosts }: Props) {
     }
   }, [commentBoxRef.current])
 
-  const handleComment = async () => {
-    if (comment.trim()) {
-      try {
-        const data: any = await postRequest('/comment', {
+  const handleComment = async (file?: File) => {
+    try {
+      let body: any
+
+      if (file) {
+        body = new FormData()
+        body.append('file', file)
+        body.append('content', comment.trim())
+        body.append('id', post.id)
+      } else {
+        body = {
           id: post.id,
           content: comment.trim()
-        })
-
-        commentsRef.current?.addComment({
-          children: [],
-          id: data.id,
-          createdAt: data.createdAt,
-          parent: null,
-          user: {
-            name: currentUser.name,
-            username: currentUser.username,
-            avatarId: {
-              cdn: currentUser.avatar
-            }
-          },
-          content: comment.trim(),
-          likeData: {
-            total: 0,
-            isLiked: false
-          }
-        })
-
-        setComment('')
-      } catch (error) {
-        toast.error('Server error')
+        }
       }
+
+      const data: any = await postRequest('/comment', body, {
+        'Content-Type': file ? 'multipart/form-data' : 'application/json'
+      })
+
+      commentsRef.current?.addComment({
+        children: [],
+        id: data.id,
+        createdAt: data.createdAt,
+        parent: null,
+        user: {
+          name: currentUser.name,
+          username: currentUser.username,
+          avatarId: {
+            cdn: currentUser.avatar
+          }
+        },
+        content: comment.trim(),
+        likeData: {
+          total: 0,
+          isLiked: false
+        },
+        media: data.media
+      })
+
+      setComment('')
+      setPosts((prev) => {
+        const findPost = prev.find((p) => p.id === post.id) as Post
+        findPost.totalComment += 1
+        return [...prev]
+      })
+    } catch (error) {
+      toast.error('Server error')
     }
+  }
+
+  const handleDeleteComment = (totalDeleted: number) => {
+    setPosts((prev) => {
+      const postFind = prev.find((p) => p.id === post.id) as Post
+      postFind.totalComment -= totalDeleted
+      return [...prev]
+    })
   }
 
   return (
     <Modal isOpen onRequestClose={onClose}>
-      <div className="w-[700px] h-[clamp(300px,9999px,90vh)] outline-none border-none">
+      <div className="w-[700px] h-fit outline-none border-none max-h-[90vh] flex flex-col items-stretch">
         <h2 className="font-bold text-xl py-3 border-b border-common-gray-medium h-14 flex items-center text-center justify-center">
           Post of {post.user.name}
         </h2>
         <div
-          className="h-[calc(100%-156px)] overflow-y-auto px-2 duration-200"
+          className="h-fit max-h-[calc(82vh-100px)] overflow-y-auto px-2 duration-200 grow"
           style={{
             // height: `calc(100% - 56px - ${
             //   commentBoxRef.current?.offsetHeight || 0
@@ -127,11 +154,11 @@ export default function ViewPost({ post, onClose, setPosts }: Props) {
                   className=" border border-common-gray-medium mt-5"
                 >
                   {media.type === MediaType.IMAGE ? (
-                    <img
+                    <Image
                       src={media.cdn}
                       alt=""
-                      // unoptimized
-                      // width={500}
+                      height={500}
+                      width={500}
                       className="w-full object-contain"
                     />
                   ) : (
@@ -141,8 +168,19 @@ export default function ViewPost({ post, onClose, setPosts }: Props) {
               ))}
           </div>
           <div>
-            <div>
-              <div>{post.likeData.total}</div>
+            <div className="py-1 border-y border-common-gray-light text-xs text-common-gray-dark flex gap-8">
+              {post.likeData.total > 0 && (
+                <div className="flex">
+                  <Image src={likeActive} alt="" width={14} />
+                  {post.likeData.total}
+                </div>
+              )}
+              {post.totalComment > 0 && (
+                <div className="flex">
+                  <Image src={messageActive} alt="" width={14} />
+                  {post.totalComment}
+                </div>
+              )}
             </div>
 
             <Actions
@@ -151,62 +189,19 @@ export default function ViewPost({ post, onClose, setPosts }: Props) {
               setPosts={setPosts}
             />
           </div>
-          <Comments idPost={post.id} ref={commentsRef} />
+          <Comments
+            idPost={post.id}
+            ref={commentsRef}
+            onDeletComment={handleDeleteComment}
+          />
         </div>
         <AddComment
+          key={'add-comment'}
           ref={commentBoxRef}
           comment={comment}
           setComment={setComment}
           onComment={handleComment}
         />
-        {/* <div
-          ref={commentBoxRef}
-          className="border-t border-common-gray-medium p-3  flex gap-1 "
-        >
-          <div>
-            <Avatar src={currentUser.avatar} width={36} />
-          </div>
-          <div className="grow bg-common-gray-light p-2 rounded-xl">
-            <textarea
-              value={comment}
-              placeholder="Comment"
-              className="w-full block resize-none bg-[#00000000] outline-none px-1 h-6 max-h-[200px] text-txt-primary"
-              onChange={(e) => {
-                setComment(e.target.value)
-                e.target.style.height = ''
-                e.target.style.height = e.target.scrollHeight + 'px'
-              }}
-            ></textarea>
-            <div className="pt-1 flex justify-between items-center">
-              <div>
-                <label
-                  htmlFor="add-image-comment"
-                  className="flex justify-center items-center w-8 h-8 opacity-60 rounded-full hover:bg-common-gray-medium duration-150 hover:opacity-80 cursor-pointer"
-                >
-                  <Image src={imagePlus} alt="" width={20} />
-                  <input
-                    id="add-image-comment"
-                    type="file"
-                    accept="image/png,image/jpeg,image/jpg"
-                    className="hidden"
-                  />
-                </label>
-              </div>
-              <button
-                className={`flex justify-center items-center w-8 h-8  rounded-full hover:bg-common-gray-medium duration-150 hover:opacity-80 ${
-                  comment.trim() ? '' : 'opacity-60'
-                }`}
-                onClick={handleComment}
-              >
-                <Image
-                  src={comment.trim() ? sendActive : send}
-                  alt=""
-                  width={20}
-                />
-              </button>
-            </div>
-          </div>
-        </div> */}
       </div>
     </Modal>
   )

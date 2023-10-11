@@ -3,14 +3,18 @@ import {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useState
 } from 'react'
 import { toast } from 'react-hot-toast'
 import { getRequest } from '~/services/client/getRequest'
+import Select from '~/components/common/Select'
 import CommentItem from './CommentItem'
+import { MediaType } from '~/helper/enum/post'
 
 interface Props {
   idPost: string
+  onDeletComment: (total: number) => void
 }
 
 export interface Comment {
@@ -34,18 +38,26 @@ export interface Comment {
     total: number
     isLiked: boolean
   }
+  media?: {
+    id: string
+    cdn: string
+    type: MediaType
+  }
 }
 
-// interface ConvertedComment extends Comment {
-//   childrenComment: Comment[]
-// }
+interface ConvertedComment extends Comment {
+  childrenComment: ConvertedComment[]
+}
 
 export interface CommentsRef {
   addComment: (comment: Comment) => void
 }
 
-function Comments({ idPost }: Props, ref: Ref<CommentsRef>) {
+function Comments({ idPost, onDeletComment }: Props, ref: Ref<CommentsRef>) {
   const [comments, setComments] = useState<Comment[]>([])
+  const [sort, setSort] = useState<'NEWEST_FIRST' | 'OLDEST_FIRST'>(
+    'NEWEST_FIRST'
+  )
 
   const addComment = (comment: Comment) => {
     setComments((prev) => [comment, ...prev])
@@ -60,6 +72,7 @@ function Comments({ idPost }: Props, ref: Ref<CommentsRef>) {
     ;(async () => {
       try {
         const data: any = await getRequest(`/comment/${idPost}`)
+
         setComments(data)
       } catch (error) {
         toast.error('Server error')
@@ -67,64 +80,78 @@ function Comments({ idPost }: Props, ref: Ref<CommentsRef>) {
     })()
   }, [])
 
-  // const convertComments = useMemo(() => {
-  //   const data: ConvertedComment[] = []
-  //   const canceled: Comment[] = [...comments]
+  const convertedComments = useMemo(() => {
+    const data: ConvertedComment[] = []
+    const canceled: Comment[] = [...comments]
+    const handleds: { id: number; level: number; link: number[] }[] = []
 
-  //   const handleds: { id: number; level: number; link: number[] }[] = []
+    while (canceled.length > 0) {
+      canceled.forEach((comment, index) => {
+        if (comment.parent) {
+          const handledItem = handleds.find(
+            (item) => item.id === comment.parent?.id
+          )
+          if (handledItem) {
+            if (handledItem.level === 1) {
+              const cmt = data.find(
+                (dataComment) => dataComment.id === handledItem.id
+              ) as ConvertedComment
+              cmt.childrenComment = [
+                ...(cmt.childrenComment || []),
+                { ...comment, childrenComment: [] }
+              ]
+              handleds.push({
+                id: comment.id,
+                level: 2,
+                link: [cmt.id, comment.id]
+              })
+              canceled.splice(index, 1)
+            }
 
-  //   while (canceled.length > 0) {
-  //     canceled.forEach((comment, index) => {
-  //       if (comment.parent) {
-  //         const handledItem = handleds.find(
-  //           (item) => item.id === comment.parent?.id
-  //         )
-  //         if (handledItem) {
-  //           if (handledItem.level === 1) {
-  //             const cmt = data.find(
-  //               (dataComment) => dataComment.id === handledItem.id
-  //             ) as ConvertedComment
-  //             cmt.childrenComment = [...(cmt.childrenComment || []), comment]
-  //             handleds.push({
-  //               id: comment.id,
-  //               level: 2,
-  //               link: [cmt.id, comment.id]
-  //             })
-  //             canceled.splice(index, 1)
-  //           }
+            if (handledItem.level === 2) {
+              const cmt = data
+                .find((dataCmt) => dataCmt.id === handledItem.link[0])
+                ?.childrenComment.find(
+                  (childComment) => childComment.id === handledItem.link[1]
+                ) as ConvertedComment
 
-  //           if (handledItem.level === 2) {
-  //             const cmt = data
-  //               .find((dataCmt) => dataCmt.id === handledItem.link[0])
-  //               ?.childrenComment.find(
-  //                 (childComment) => childComment.id === handledItem.link[1]
-  //               ) as ConvertedComment
+              cmt.childrenComment = [
+                ...(cmt.childrenComment || []),
+                comment as ConvertedComment
+              ]
+              handleds.push({
+                id: comment.id,
+                level: 3,
+                link: [...handledItem.link, comment.id]
+              })
+              canceled.splice(index, 1)
+            }
+          } else {
+            return
+          }
+        } else {
+          handleds.push({
+            id: comment.id,
+            level: 1,
+            link: []
+          })
 
-  //             cmt.childrenComment = [...(cmt.childrenComment || []), comment]
-  //             handleds.push({
-  //               id: comment.id,
-  //               level: 3,
-  //               link: [...handledItem.link, comment.id]
-  //             })
-  //             canceled.splice(index, 1)
-  //           }
-  //         } else {
-  //           return
-  //         }
-  //       } else {
-  //         handleds.push({
-  //           id: comment.id,
-  //           level: 1,
-  //           link: []
-  //         })
+          const [cmt] = canceled.splice(index, 1)
+          data.push({ ...cmt, childrenComment: [] } as ConvertedComment)
+        }
+      })
+    }
 
-  //         const [cmt] = canceled.splice(index, 1)
-  //         data.push(cmt as ConvertedComment)
-  //       }
-  //     })
-  //   }
-  //   return data
-  // }, [comments])
+    data.sort((a, b) => (sort === 'NEWEST_FIRST' ? b.id - a.id : a.id - b.id))
+    data.forEach((comments) => {
+      comments.childrenComment.forEach((subChildComments) => {
+        subChildComments.childrenComment.sort((a, b) => a.id - b.id)
+      })
+      comments.childrenComment.sort((a, b) => a.id - b.id)
+    })
+
+    return data
+  }, [comments, sort])
 
   const handleLike = (id: number, message: string) => {
     setComments((prev) => {
@@ -140,48 +167,67 @@ function Comments({ idPost }: Props, ref: Ref<CommentsRef>) {
   }
 
   return (
-    <div>
-      {comments.map((comment) => (
-        <CommentItem
-          key={comment.id}
-          comment={comment}
-          porstId={idPost}
-          onLike={(id, message) => handleLike(id, message)}
-        />
-        // <div key={comment.id} className="flex gap-2 mt-3">
-        //   <div>
-        //     <Avatar src={comment.user.avatarId.cdn} width={36} />
-        //   </div>
-        //   <div>
-        //     <div className="w-fit p-1 px-3 rounded-xl bg-common-gray-light">
-        //       <Link
-        //         href={`/user/${comment.user.username}`}
-        //         className="font-bold"
-        //       >
-        //         {comment.user.name}
-        //       </Link>
-        //       <p>{comment.content}</p>
-        //     </div>
-        //     <div className="flex gap-4 text-xs font-semibold text-common-gray-dark px-3">
-        //       <div
-        //         className={`cursor-pointer ${
-        //           comment.likeData.isLiked ? 'text-common-purble' : ''
-        //         }`}
-        //         onClick={() => handleLikeComment(comment.id)}
-        //       >
-        //         Like
-        //       </div>
-        //       <div
-        //         className={`cursor-pointer `}
-        //         // onClick={() => handleLikeComment(comment.id)}
-        //       >
-        //         Reply
-        //       </div>
-        //     </div>
-        //   </div>
-        // </div>
+    <>
+      {convertedComments.length > 0 && (
+        <div className="w-fit ml-auto my-1 mt-2">
+          <Select
+            data={[
+              {
+                key: 'NEWEST_FIRST',
+                label: 'Newest first'
+              },
+              {
+                key: 'OLDEST_FIRST',
+                label: 'Oldest first'
+              }
+            ]}
+            currentActiveKey={sort}
+            onChange={(key) => setSort(key as typeof sort)}
+            passClass="w-[120px] text-sm font-semibold border-0 rounded-full bg-common-gray-light py-[2px] hover:bg-common-gray-medium duration-100"
+            itemClassName="font-medium"
+            trigger="click"
+          />
+        </div>
+      )}
+
+      {convertedComments.map((comment) => (
+        <>
+          <CommentItem
+            key={comment.id}
+            comment={comment}
+            porstId={idPost}
+            onLike={(id, message) => handleLike(id, message)}
+            setComments={setComments}
+            onDeletComment={onDeletComment}
+          />
+          {comment?.childrenComment.length > 0 &&
+            comment.childrenComment.map((childComment) => (
+              <>
+                <CommentItem
+                  key={childComment.id}
+                  comment={childComment}
+                  onLike={(id, message) => handleLike(id, message)}
+                  porstId={idPost}
+                  level={2}
+                  setComments={setComments}
+                  onDeletComment={onDeletComment}
+                />
+                {childComment.childrenComment.map((subChildComment) => (
+                  <CommentItem
+                    key={subChildComment.id}
+                    comment={subChildComment}
+                    porstId={idPost}
+                    level={3}
+                    onLike={(id, message) => handleLike(id, message)}
+                    setComments={setComments}
+                    onDeletComment={onDeletComment}
+                  />
+                ))}
+              </>
+            ))}
+        </>
       ))}
-    </div>
+    </>
   )
 }
 

@@ -13,6 +13,7 @@ export interface Post {
     total: number
     isLiked: boolean
   }
+  totalComment: number
 }
 
 export interface Media {

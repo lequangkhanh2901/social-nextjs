@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'react-hot-toast'
@@ -12,6 +12,7 @@ import { RootState } from '~/redux/store'
 import usePopup from '~/helper/hooks/usePopup'
 import { postTypes } from '~/helper/data/post'
 import { RegimePost } from '~/helper/enum/post'
+import { Post } from '~/helper/type/common'
 import { postRequest } from '~/services/client/postRequest'
 
 import Avatar from '~/components/common/Avatar'
@@ -27,7 +28,11 @@ import close from '~/public/icons/close.svg'
 
 type FileType = 'image/png' | 'image/jpeg' | 'image/jpg' | 'video/mp4'
 
-export default function AddPost() {
+export default function AddPost({
+  setPosts
+}: {
+  setPosts: Dispatch<SetStateAction<Post[]>>
+}) {
   const { currentUser } = useAppSelector((state: RootState) => state.user)
 
   const [postType, setPostType] = useState<'normal' | 'status' | 'media'>(
@@ -102,16 +107,42 @@ export default function AddPost() {
           type: regime
         }
       }
-      await postRequest('/post', body, {
+      const data: any = await postRequest('/post', body, {
         'Content-Type':
           medias && medias.length > 0
             ? 'multipart/form-data'
             : 'application/json'
       })
+
       toast.success(tHome.postCreated)
-      setMedias(undefined), setContent('')
+      setMedias(undefined)
+      setContent('')
       setPostType('normal')
       closePopup()
+
+      setPosts((prev) => [
+        {
+          content: data.content,
+          createdAt: data.createdAt,
+          id: data.id,
+          likeData: {
+            isLiked: false,
+            total: 0
+          },
+          medias: data.medias,
+          type: data.type,
+          updatedAt: data.updatedAt,
+          user: {
+            avatarId: {
+              cdn: currentUser.avatar
+            },
+            name: currentUser.name,
+            username: currentUser.username
+          },
+          totalComment: 0
+        },
+        ...prev
+      ])
     } catch (error) {
       toast.error(tCommon.serverError)
     } finally {

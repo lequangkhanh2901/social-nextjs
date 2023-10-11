@@ -7,6 +7,7 @@ import { getDictionary } from '~/locales'
 import { getRequest } from '~/services/client/getRequest'
 import { Post as IPost } from '~/helper/type/common'
 import Post from '../Post'
+import AddPost from '../AddPost'
 
 export default function Main() {
   const [posts, setPosts] = useState<IPost[]>([])
@@ -28,10 +29,13 @@ export default function Main() {
   }, [page])
 
   return (
-    <div>
-      {posts.map((post) => (
-        <Post key={post.id} post={post} setPosts={setPosts} />
-      ))}
-    </div>
+    <>
+      <AddPost setPosts={setPosts} />
+      <div>
+        {posts.map((post) => (
+          <Post key={post.id} post={post} setPosts={setPosts} />
+        ))}
+      </div>
+    </>
   )
 }
