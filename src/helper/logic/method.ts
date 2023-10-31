@@ -13,3 +13,21 @@ export const updateSearchParam = (key: string, value: string) => {
 
   return searchParams.toString()
 }
+
+export const convertSecondsToHHMMSS = (time: number) => {
+  let formatedTime = ''
+
+  if (time > 3600) {
+    formatedTime += `${Math.floor(time / 3600)}:`
+    time = time % 3600
+  }
+  if (time > 60) {
+    formatedTime += `${Math.floor(time / 60)}:`
+    time = time % 60
+  } else if (formatedTime) {
+    formatedTime += '00:'
+  }
+  formatedTime += time
+
+  return formatedTime
+}

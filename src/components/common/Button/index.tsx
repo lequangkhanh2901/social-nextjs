@@ -6,7 +6,9 @@ import loaddindIcon from '~/public/images/loading.png'
 interface ButtonProps {
   title: string
   prefixIcon?: string | StaticImageData
+  prefixClassName?: string
   subfixIcon?: string | StaticImageData
+  subfixClassName?: string
   isOutline?: boolean
   rounded?: boolean
   href?: string
@@ -21,7 +23,9 @@ interface ButtonProps {
 function Button({
   title,
   prefixIcon,
+  prefixClassName = '',
   subfixIcon,
+  subfixClassName = '',
   isOutline,
   rounded,
   href,
@@ -81,9 +85,25 @@ function Button({
         </div>
       )}
       <div className="button-content">
-        {prefixIcon && <Image src={prefixIcon} alt="" width={30} height={30} />}
+        {prefixIcon && (
+          <Image
+            src={prefixIcon}
+            alt=""
+            width={30}
+            height={30}
+            className={prefixClassName}
+          />
+        )}
         <span>{title}</span>
-        {subfixIcon && <Image src={subfixIcon} alt="" width={30} height={30} />}
+        {subfixIcon && (
+          <Image
+            src={subfixIcon}
+            alt=""
+            width={30}
+            height={30}
+            className={subfixClassName}
+          />
+        )}
       </div>
     </Component>
   )

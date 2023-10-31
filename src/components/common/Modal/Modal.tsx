@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { MouseEvent, ReactNode } from 'react'
 import ReactModal from 'react-modal'
 import { useThemeContext } from '~/components/layout/Wrapper'
 
@@ -18,7 +18,7 @@ interface ModalProps {
     | 'bottom-left'
     | 'bottom-right'
 
-  onRequestClose: () => void
+  onRequestClose: (e: MouseEvent) => void
   onAfterOpen?: () => void
 }
 
@@ -62,8 +62,8 @@ function Modal({
     <ReactModal
       isOpen={isOpen}
       shouldCloseOnOverlayClick={shouldCloseOnOverlayClick}
-      overlayClassName={`bg-[#00000088] fixed inset-0 flex p-5 ${renderclass()}`}
-      className={`bg-common-white rounded-md react-modal-${theme}`}
+      overlayClassName={`bg-[#22222288] fixed inset-0 flex p-5 ${renderclass()}`}
+      className={`bg-common-white rounded-md react-modal-${theme} outline-none `}
       style={{
         overlay: {
           zIndex

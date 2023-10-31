@@ -13,12 +13,8 @@ const getRequest = async (url: string): Promise<object> => {
           'Content-Type': 'application/json'
         }
       })
-      .then((res: any) => {
-        return res
-      })
-      .catch((error) => {
-        return Promise.reject(error)
-      })
+      .then((res: any) => res)
+      .catch((error) => Promise.reject(error))
   }
 
   return axiosInstance

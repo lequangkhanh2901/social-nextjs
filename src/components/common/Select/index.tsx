@@ -3,6 +3,7 @@ import Image from 'next/image'
 
 import { useThemeContext } from '~/components/layout/Wrapper'
 import ritghArrowIcon from '~/public/icons/rightArrow.png'
+import { twMerge } from 'tailwind-merge'
 
 interface Data {
   key: string | number
@@ -15,6 +16,9 @@ interface SelectProps {
   currentActiveKey?: string | number
   isIconPrefix?: boolean
   trigger?: 'hover' | 'click'
+  dropDownClassName?: string
+  itemClassName?: string
+  activeClassName?: string
   onChange: (key: string | number) => void
 }
 
@@ -23,6 +27,9 @@ function Select({
   passClass,
   currentActiveKey,
   isIconPrefix,
+  dropDownClassName,
+  itemClassName = '',
+  activeClassName,
   onChange,
   trigger = 'hover'
 }: SelectProps) {
@@ -98,7 +105,10 @@ function Select({
   return (
     <div
       ref={wrapRef}
-      className={`flex gap-2 items-center px-2 py-1 border rounded text-lg bg-common-white relative cursor-pointer select-none ${passClass}`}
+      className={twMerge(
+        'flex gap-2 items-center justify-between px-2 py-1 border rounded text-lg bg-common-white relative cursor-pointer select-none',
+        passClass
+      )}
     >
       {isIconPrefix ? (
         <>
@@ -127,7 +137,10 @@ function Select({
       )}
 
       <div
-        className={`w-full overflow-hidden bg-common-white absolute top-[calc(100%+2px)] left-0 duration-300 z-10 rounded`}
+        className={twMerge(
+          'w-full overflow-hidden bg-common-white absolute top-[calc(100%+2px)] left-0 duration-300 z-10 rounded',
+          dropDownClassName
+        )}
         style={{
           height: isShow ? listHeigh : 0,
           boxShadow: '1px 2px 5px #888'
@@ -138,8 +151,10 @@ function Select({
             <div
               key={index}
               className={`hover:bg-bg-primary px-2 ${
-                currentActiveKey === item.key ? 'bg-bg-primary' : ''
-              }`}
+                currentActiveKey === item.key
+                  ? `bg-bg-primary ${activeClassName}`
+                  : ''
+              } ${itemClassName}`}
               onClick={() => handleItemClick(item.key)}
             >
               {item.label}

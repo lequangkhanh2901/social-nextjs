@@ -5,7 +5,7 @@ import { AxiosHeaders } from 'axios'
 
 const deleteRequest = async (
   url: string,
-  data: { [key: string]: any },
+  data?: { [key: string]: any },
   headers?: AxiosHeaders
 ): Promise<object> => {
   const token = getCookie(ACCESS_TOKEN)

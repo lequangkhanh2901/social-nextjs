@@ -10,7 +10,8 @@ import { useLanguage } from '~/helper/hooks/useLangguage'
 import { SETUP_USER_SCHEMA } from '~/helper/schema/user'
 import { getDictionary } from '~/locales'
 import { putRequest } from '~/services/client/putRequest'
-import { useAppSelector } from '~/redux/hooks'
+import { useAppDispatch, useAppSelector } from '~/redux/hooks'
+import { updatePartialUser } from '~/redux/user/userSlice'
 import { RootState } from '~/redux/store'
 
 import Button from '~/components/common/Button'
@@ -26,12 +27,17 @@ export default function MainSetup() {
   const [step, setStep] = useState<'info' | 'avatar'>('info')
 
   const { currentUser } = useAppSelector((state: RootState) => state.user)
+  const dispatch = useAppDispatch()
   const router = useRouter()
   const { tUser, tAuth, tCommon } = getDictionary(lang)
 
   useEffect(() => {
     if (currentUser.actived) {
       router.replace('/')
+    }
+
+    if (currentUser.name && currentUser.username) {
+      setStep('avatar')
     }
   }, [currentUser])
 
@@ -47,11 +53,19 @@ export default function MainSetup() {
 
       try {
         setIsPosting(true)
-        await putRequest('/user', { name, username, sex })
+        const data: any = await putRequest('/user', { name, username, sex })
         toast.success(tCommon.success)
+        dispatch(
+          updatePartialUser({
+            name: data.name,
+            username: data.username
+          })
+        )
         setStep('avatar')
-      } catch (error) {
-        toast.error(tCommon.serverError)
+      } catch (error: any) {
+        if (error.response.data.message === 'EXISTED_USERNANE')
+          toast.error('EXISTED_USERNANE')
+        else toast.error(tCommon.serverError)
       }
       setIsPosting(false)
     }
@@ -75,16 +89,19 @@ export default function MainSetup() {
             value={formik.values.name}
             placeholder={tUser.name}
             label={tUser.name}
-            error={formik.errors.name}
+            error={
+              formik.errors.name && formik.touched.name && formik.errors.name
+            }
             onChange={formik.handleChange}
           />
           <Input
             name="username"
-            value={formik.values.username}
+            value={formik.values.username || ''}
             placeholder={tUser.username}
             label={tUser.username}
             error={
               formik.errors.username &&
+              formik.touched.username &&
               (tCommon[formik.errors.username as keyof typeof tCommon] ||
                 formik.errors.username)
             }
