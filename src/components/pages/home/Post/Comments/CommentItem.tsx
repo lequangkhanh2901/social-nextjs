@@ -70,13 +70,27 @@ export default function CommentItem({
     } catch (error) {}
   }
 
-  const handleReply = async () => {
-    if (commentVal.trim()) {
+  const handleReply = async (file?: File) => {
+    if (commentVal.trim() || file) {
       try {
-        const data: any = await postRequest('/comment', {
-          id: porstId,
-          content: commentVal,
-          parentId: comment.id
+        let body: any
+
+        if (file) {
+          body = new FormData()
+          body.append('file', file)
+          body.append('content', commentVal.trim())
+          body.append('id', porstId)
+          body.append('parentId', comment.id)
+        } else {
+          body = {
+            id: porstId,
+            content: commentVal.trim(),
+            parentId: comment.id
+          }
+        }
+
+        const data: any = await postRequest('/comment', body, {
+          'Content-Type': file ? 'multipart/form-data' : 'application/json'
         })
 
         setComments((prev) => [
@@ -99,7 +113,8 @@ export default function CommentItem({
             parent: {
               id: data.parent.id
             },
-            content: data.content
+            content: data.content,
+            media: data.media
           }
         ])
         closePopup()
@@ -186,7 +201,7 @@ export default function CommentItem({
             ref={boxRef}
             comment={commentVal}
             setComment={setCommentVal}
-            onComment={handleReply}
+            onComment={(file) => handleReply(file)}
           />
         </div>
       </div>

@@ -6,7 +6,7 @@ export const SETUP_USER_SCHEMA = object({
   username: string()
     .trim()
     .required('isRequire')
-    .min(3)
+    .min(6)
     .max(30)
     .matches(/^[A-Za-z0-9]+$/, 'wrongFormat'),
   sex: mixed<Sex>().oneOf(Object.values(Sex)).required('isRequired')

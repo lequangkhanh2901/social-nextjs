@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { MouseEvent, ReactNode } from 'react'
 import ReactModal from 'react-modal'
 import { useThemeContext } from '~/components/layout/Wrapper'
 
@@ -18,7 +18,7 @@ interface ModalProps {
     | 'bottom-left'
     | 'bottom-right'
 
-  onRequestClose: () => void
+  onRequestClose: (e: MouseEvent) => void
   onAfterOpen?: () => void
 }
 

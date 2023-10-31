@@ -47,7 +47,7 @@ function AddComment(
       ref={ref}
       className="border-t border-common-gray-medium p-3 flex gap-1 mt-1"
     >
-      <Avatar src={currentUser.avatar} width={36} />
+      <Avatar src={currentUser.avatar} width={36} className="self-start" />
       <div className="grow bg-common-gray-light p-2 rounded-xl">
         <textarea
           value={comment}

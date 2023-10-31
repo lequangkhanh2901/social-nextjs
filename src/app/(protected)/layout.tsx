@@ -1,7 +1,7 @@
 'use client'
 
 import { ReactNode, useLayoutEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 
 import { useAppDispatch, useAppSelector } from '~/redux/hooks'
@@ -17,6 +17,7 @@ import Header from '~/components/layout/protected/Header'
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const pathname = usePathname()
 
   const { currentUser } = useAppSelector((state: RootState) => state.user)
   const dispatch = useAppDispatch()
@@ -27,6 +28,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
         router.replace('/login')
       } else {
         if (!currentUser.id) {
+          setIsLoading(true)
           await getMe()
         } else {
           if (!currentUser.actived) {
@@ -37,7 +39,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
       }
       setIsLoading(false)
     })()
-  }, [currentUser])
+  }, [currentUser, pathname])
 
   const getMe = async () => {
     try {

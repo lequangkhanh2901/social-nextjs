@@ -6,7 +6,7 @@ export default function Avatar({
   alt = '',
   className = ''
 }: {
-  src: string | StaticImageData
+  src?: string | StaticImageData
   width: number
   alt?: string
   className?: string
@@ -21,11 +21,7 @@ export default function Avatar({
         e.currentTarget.onerror = null
         e.currentTarget.src = '/icons/layout/header/default_avatar.png'
       }}
-      style={{
-        width: width,
-        height: width
-      }}
-      className={`rounded-full object-cover border border-common-gray-light hover:border-common-gray-medium ${className}`}
+      className={`rounded-full object-cover border border-common-gray-light hover:border-common-gray-medium aspect-square w-[${width}px] ${className}`}
     />
   )
 }

@@ -48,6 +48,19 @@ module.exports = {
       tablet: '920px',
       laptop: '1140px',
       desktop: '1440px'
+    },
+    animation: {
+      'loading-sk': 'loading-sk 1s linear infinite'
+    },
+    keyframes: {
+      'loading-sk': {
+        '0%, 100%': {
+          opacity: 1
+        },
+        '50%': {
+          opacity: 0.5
+        }
+      }
     }
   },
 

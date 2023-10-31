@@ -1,0 +1,240 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { useParams, usePathname } from 'next/navigation'
+
+import { RelationWithUser, Sex, Status } from '~/helper/enum/user'
+import usePopup from '~/helper/hooks/usePopup'
+import { useAppSelector } from '~/redux/hooks'
+import { RootState } from '~/redux/store'
+
+import { getRequest } from '~/services/client/getRequest'
+import { putRequest } from '~/services/client/putRequest'
+import { postRequest } from '~/services/client/postRequest'
+import { deleteRequest } from '~/services/client/deleteRequest'
+
+import Avatar from '~/components/common/Avatar'
+import Button from '~/components/common/Button'
+
+import requestFriend from '~/public/icons/friend/request_friend.svg'
+import friended from '~/public/icons/friend/friended.png'
+import edit from '~/public/icons/edit.svg'
+import Modal from '~/components/common/Modal/Modal'
+import ChangeAvatar from './ChangeAvatar'
+import Menu from '~/components/common/Menu'
+
+interface User {
+  id: string
+  name: string
+  username: string
+  status: Status
+  sex: Sex
+  avatarId: {
+    id: string
+    cdn: string
+  }
+  countFriend: number
+  relation?: RelationWithUser
+}
+
+const relationMaping = {
+  [RelationWithUser.FRIEND]: {
+    label: 'Friended',
+    icon: friended
+  },
+  [RelationWithUser.NONE]: {
+    label: 'Add friend',
+    icon: requestFriend
+  },
+  [RelationWithUser.WAITING_ACCEPT_BY_ME]: {
+    label: 'Accept',
+    icon: friended
+  },
+  [RelationWithUser.WAITING_ACCEPT_BY_USER]: {
+    label: 'Cancel',
+    icon: friended
+  }
+}
+
+export default function Info() {
+  const { username } = useParams()
+  const pathname = usePathname()
+
+  const { currentUser } = useAppSelector((state: RootState) => state.user)
+
+  const [user, setUser] = useState<User>()
+  const [isLoading, setIsLoading] = useState(false)
+  const { isShow, closePopup, openPopup } = usePopup()
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const data = await getRequest(`/user/${username}`)
+
+        setUser(data as User)
+      } catch (error) {}
+    })()
+  }, [username])
+
+  const navs = useMemo(
+    () => [
+      {
+        url: `/user/${username}`,
+        label: 'Post'
+      },
+      {
+        url: `/user/${username}/introduce`,
+        label: 'Introduce'
+      },
+      {
+        url: `/user/${username}/friends`,
+        label: 'Friends'
+      },
+      {
+        url: `/user/${username}/photos`,
+        label: 'Photos'
+      },
+      {
+        url: `/user/${username}/videos`,
+        label: 'Videos'
+      }
+    ],
+    [username]
+  )
+
+  const handleClickAction = async () => {
+    if (isLoading) return
+    setIsLoading(true)
+    try {
+      switch (user?.relation) {
+        case RelationWithUser.WAITING_ACCEPT_BY_ME:
+          await putRequest(`/request-friend/${user.id}`)
+          setUser((prev) => ({
+            ...(prev as User),
+            relation: RelationWithUser.FRIEND
+          }))
+          return
+
+        case RelationWithUser.NONE:
+          await postRequest(`/request-friend/${user.id}`)
+          setUser((prev) => ({
+            ...(prev as User),
+            relation: RelationWithUser.WAITING_ACCEPT_BY_USER
+          }))
+          return
+
+        case RelationWithUser.WAITING_ACCEPT_BY_USER:
+          await deleteRequest(`/request-friend/${user.id}`)
+          setUser((prev) => ({
+            ...(prev as User),
+            relation: RelationWithUser.NONE
+          }))
+          return
+
+        default:
+          return
+      }
+    } catch (error) {
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <>
+      <div className="bg-common-white p-5 rounded-md">
+        <div className="h-[400px] bg-common-gray-light"></div>
+        <div className="flex px-9 items-end w-full -mt-[100px] ">
+          <div className="relative rounded-full group">
+            <Avatar
+              src={user?.avatarId.cdn}
+              width={200}
+              className="!border-4 !border-common-white shadow-[0_1px_4px_#00000040]"
+            />
+            {currentUser.username === username && (
+              <div
+                className="absolute bottom-[10%] right-[10%] p-2 bg-common-white rounded-full opacity-50 group-hover:opacity-100 cursor-pointer shadow-md"
+                onClick={openPopup}
+              >
+                <Image src={edit} alt="edit" width={20} />
+              </div>
+            )}
+          </div>
+          <div>
+            <p className="text-4xl font-bold">{user?.name}</p>
+            <p className="text-common-gray-dark font-bold ">
+              {user?.countFriend} friends
+            </p>
+          </div>
+          <div className="ml-auto flex">
+            {currentUser.username !== username && user && (
+              <Button
+                title={relationMaping[user?.relation as RelationWithUser].label}
+                prefixIcon={friended}
+                prefixClassName="w-4 h-4 object-cover"
+                isOutline={user?.relation === RelationWithUser.FRIEND}
+                onClick={handleClickAction}
+                loadding={isLoading}
+              />
+            )}
+            <Menu
+              // renderButton={<div>aaab</div>}
+              // renderButton="aaa"
+              menu={[
+                {
+                  label: 'a',
+
+                  handle: () => {
+                    //
+                  },
+                  requireConfirm: true,
+                  icon: '/icons/bin.svg',
+                  subMenu: {
+                    menu: [
+                      {
+                        label: 'sub',
+                        handle() {
+                          //
+                        },
+                        requireConfirm: true
+                      }
+                    ]
+                  }
+                },
+                {
+                  label: 'a',
+
+                  handle: () => {
+                    //
+                  },
+                  requireConfirm: true
+                }
+              ]}
+            />
+          </div>
+        </div>
+        <div className="mx-9 flex mt-5 border-t border-common-gray-medium pt-1">
+          {navs.map((nav, index) => (
+            <Link
+              href={nav.url}
+              key={index}
+              className={`py-3 px-5 duration-100 font-bold text-common-gray-dark text-[15px] ${
+                pathname === nav.url
+                  ? 'border-b-4 border-common-purble text-common-purble'
+                  : 'hover:bg-common-gray-light rounded'
+              }`}
+            >
+              {nav.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <Modal isOpen={isShow} onRequestClose={closePopup}>
+        <ChangeAvatar />
+      </Modal>
+    </>
+  )
+}
