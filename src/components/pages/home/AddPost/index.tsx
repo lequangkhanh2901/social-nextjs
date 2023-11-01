@@ -11,8 +11,8 @@ import { useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
 import usePopup from '~/helper/hooks/usePopup'
 import { postTypes } from '~/helper/data/post'
-import { RegimePost } from '~/helper/enum/post'
-import { Post } from '~/helper/type/common'
+import { PostType, RegimePost } from '~/helper/enum/post'
+import { FileType, Post } from '~/helper/type/common'
 import { postRequest } from '~/services/client/postRequest'
 
 import Avatar from '~/components/common/Avatar'
@@ -26,8 +26,6 @@ import smile from '~/public/icons/home/smile_active.svg'
 import smileNor from '~/public/icons/home/smile.svg'
 import close from '~/public/icons/close.svg'
 
-type FileType = 'image/png' | 'image/jpeg' | 'image/jpg' | 'video/mp4'
-
 export default function AddPost({
   setPosts
 }: {
@@ -35,9 +33,7 @@ export default function AddPost({
 }) {
   const { currentUser } = useAppSelector((state: RootState) => state.user)
 
-  const [postType, setPostType] = useState<'normal' | 'status' | 'media'>(
-    'normal'
-  )
+  const [postType, setPostType] = useState<PostType>(PostType.NORMAL)
   const [regime, setRegime] = useState(RegimePost.PUBLIC)
   const [content, setContent] = useState('')
   const [medias, setMedias] = useState<File[]>()
@@ -89,7 +85,7 @@ export default function AddPost({
 
   const handleRemoveMedias = () => {
     setMedias([])
-    setPostType('normal')
+    setPostType(PostType.NORMAL)
   }
 
   const handleCreatePost = async () => {
@@ -98,9 +94,9 @@ export default function AddPost({
       let body: any
       if (medias && medias.length > 0) {
         body = new FormData()
-        body.append('content', content),
-          body.append('type', regime),
-          medias.forEach((media) => body.append('medias', media))
+        body.append('content', content)
+        body.append('type', regime)
+        medias.forEach((media) => body.append('medias', media))
       } else {
         body = {
           content,
@@ -117,7 +113,7 @@ export default function AddPost({
       toast.success(tHome.postCreated)
       setMedias(undefined)
       setContent('')
-      setPostType('normal')
+      setPostType(PostType.NORMAL)
       closePopup()
 
       setPosts((prev) => [
@@ -159,7 +155,7 @@ export default function AddPost({
             className="grow !cursor-pointer rounded-full text-common-gray-dark px-4 py-[6px] bg-common-gray-light"
             onClick={() => {
               if (!medias || !medias.length) {
-                setPostType('normal')
+                setPostType(PostType.NORMAL)
               }
               openPopup()
             }}
@@ -171,7 +167,7 @@ export default function AddPost({
           <div
             className="flex gap-1 items-center hover:bg-common-gray-light duration-100 rounded px-4 py-1 cursor-pointer"
             onClick={() => {
-              setPostType('media'), openPopup()
+              setPostType(PostType.MEDIA), openPopup()
             }}
           >
             <Image src={addImage} alt="" width={32} />
@@ -180,7 +176,7 @@ export default function AddPost({
           <div
             className="flex gap-1 items-center hover:bg-common-gray-light duration-100 rounded px-4 py-1 cursor-pointer"
             onClick={() => {
-              setPostType('status'), openPopup()
+              setPostType(PostType.STATUS), openPopup()
             }}
           >
             <Image src={smile} alt="" width={32} />
@@ -225,7 +221,7 @@ export default function AddPost({
                 e.target.style.height = e.target.scrollHeight + 'px'
               }}
             ></textarea>
-            {postType === 'media' && (
+            {postType === PostType.MEDIA && (
               <>
                 <div className="p-2 rounded-xl border border-common-gray-medium relative group">
                   <div
@@ -289,20 +285,20 @@ export default function AddPost({
           <div className="flex gap-2 my-2">
             <div
               className="flex justify-center items-center px-3 py-1 rounded bg-common-gray-light hover:bg-common-gray-medium duration-100 cursor-pointer"
-              onClick={() => setPostType('media')}
+              onClick={() => setPostType(PostType.MEDIA)}
             >
               <Image
-                src={postType === 'media' ? addImage : image}
+                src={postType === PostType.MEDIA ? addImage : image}
                 alt=""
                 width={30}
               />
             </div>
             <div
               className="flex justify-center items-center px-3 py-1 rounded bg-common-gray-light hover:bg-common-gray-medium duration-100 cursor-pointer"
-              onClick={() => setPostType('status')}
+              onClick={() => setPostType(PostType.STATUS)}
             >
               <Image
-                src={postType === 'status' ? smile : smileNor}
+                src={postType === PostType.STATUS ? smile : smileNor}
                 alt=""
                 width={30}
               />

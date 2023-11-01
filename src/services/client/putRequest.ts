@@ -1,12 +1,12 @@
 import { getCookie } from '~/untils/clientCookie'
 import axiosInstance from './axiosInstanceClient'
 import { ACCESS_TOKEN } from '~/settings/constants'
-import { AxiosHeaders } from 'axios'
+import { RawAxiosRequestHeaders } from 'axios'
 
 const putRequest = async (
   url: string,
   data?: { [key: string]: any },
-  headers?: AxiosHeaders
+  headers?: RawAxiosRequestHeaders
 ): Promise<object> => {
   const token = getCookie(ACCESS_TOKEN)
 

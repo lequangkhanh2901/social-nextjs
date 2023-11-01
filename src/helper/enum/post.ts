@@ -8,3 +8,9 @@ export enum MediaType {
   IMAGE = 'IMAGE',
   VIDEO = 'VIDEO'
 }
+
+export enum PostType {
+  NORMAL = 'NORMAL',
+  MEDIA = 'MEDIA',
+  STATUS = 'STATUS'
+}

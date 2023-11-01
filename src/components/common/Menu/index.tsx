@@ -16,6 +16,7 @@ interface Props {
   menu: IMenuItem[]
   renderButton?: ReactNode
   classNameButton?: string
+  classNameWrapButton?: string
 }
 
 export default function Menu({
@@ -26,7 +27,8 @@ export default function Menu({
   className = '',
   menu,
   renderButton,
-  classNameButton = ''
+  classNameButton = '',
+  classNameWrapButton = ''
 }: Props) {
   const { isShow, closePopup, togglePopup } = usePopup()
 
@@ -62,48 +64,50 @@ export default function Menu({
   }
 
   return (
-    <div>
-      <div ref={ref} className="relative " onClick={togglePopup}>
-        {renderButton || (
-          <div
-            className={twMerge(
-              ' p-1 bg-common-gray-light rounded hover:bg-common-gray-medium duration-100 cursor-pointer',
-              classNameButton
-            )}
-          >
-            <Image
-              src={dots}
-              alt=""
-              width={24}
-              height={24}
-              className="opacity-75 w-6 h-6 "
-            />
-          </div>
-        )}
+    <div
+      ref={ref}
+      className={`relative ${classNameWrapButton}`}
+      onClick={togglePopup}
+    >
+      {renderButton || (
+        <div
+          className={twMerge(
+            ' p-1 bg-common-gray-light rounded hover:bg-common-gray-medium duration-100 cursor-pointer',
+            classNameButton
+          )}
+        >
+          <Image
+            src={dots}
+            alt=""
+            width={24}
+            height={24}
+            className="opacity-75 w-6 h-6 "
+          />
+        </div>
+      )}
 
-        {isShow && (
-          <div
-            className={twMerge(
-              'absolute w-[200px] z-10 p-1 rounded-md bg-common-white shadow-md',
-              renderPositionClass(),
-              className
-            )}
-          >
-            {menu.map((item, index) => (
-              <Item
-                key={index}
-                label={item.label}
-                icon={item.icon}
-                className={item.className}
-                requireConfirm={item.requireConfirm}
-                confirmMessage={item.confirmMessage}
-                handle={item.handle}
-                subMenu={item.subMenu}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      {isShow && (
+        <div
+          className={twMerge(
+            'absolute w-[200px] z-10 p-1 rounded-md bg-common-white shadow-md',
+            renderPositionClass(),
+            className
+          )}
+        >
+          {menu.map((item, index) => (
+            <Item
+              key={index}
+              label={item.label}
+              icon={item.icon}
+              className={item.className}
+              requireConfirm={item.requireConfirm}
+              confirmMessage={item.confirmMessage}
+              handle={item.handle}
+              subMenu={item.subMenu}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

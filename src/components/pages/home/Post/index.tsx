@@ -11,14 +11,21 @@ import { useLanguageContext } from '~/components/layout/Wrapper'
 import { getDictionary } from '~/locales'
 import usePopup from '~/helper/hooks/usePopup'
 import { deleteRequest } from '~/services/client/deleteRequest'
+import { useAppSelector } from '~/redux/hooks'
+import { RootState } from '~/redux/store'
 
 import Avatar from '~/components/common/Avatar'
+import Menu from '~/components/common/Menu'
+import { MenuItem as IMenuItem } from '~/components/common/Menu/Item'
 import play from '~/public/icons/play_active.svg'
 import likeActive from '~/public/icons/home/like_active.svg'
 import messageActive from '~/public/icons/message_active.svg'
+import bin from '~/public/icons/bin.svg'
+import edit from '~/public/icons/edit.svg'
+
 import ViewPost from './ViewPost'
 import Actions from './Actions'
-import Options from './Options'
+import UpdatePost from './UpdatePost'
 
 interface Props {
   post: Post
@@ -29,6 +36,8 @@ export default function Post({ post, setPosts }: Props) {
   const contentRef = useRef<HTMLDivElement>(null)
   const [isViewAll, setIsViewAll] = useState(false)
   const { isShow, openPopup, closePopup } = usePopup()
+  const updatePopup = usePopup()
+  const { currentUser } = useAppSelector((state: RootState) => state.user)
 
   useEffect(() => {
     if (contentRef.current) {
@@ -42,17 +51,39 @@ export default function Post({ post, setPosts }: Props) {
   const { lang } = useLanguageContext()
   const { tHome } = getDictionary(lang)
 
-  const handleDeletePost = async (id: string) => {
+  const handleDeletePost = async () => {
     try {
       await deleteRequest('/post', {
-        id
+        id: post.id
       })
 
       toast.success('Deleted')
-      setPosts((prev) => prev.filter((post) => post.id !== id))
+      setPosts((prev) => prev.filter((_post) => _post.id !== post.id))
     } catch (error) {
       toast.error('Delete fail')
     }
+  }
+
+  const renderMenuOption = (): IMenuItem[] => {
+    if (currentUser.username === post.user.username) {
+      return [
+        {
+          icon: edit,
+          label: 'Update',
+          handle: updatePopup.openPopup
+        },
+
+        {
+          icon: bin,
+          label: 'Delete',
+          requireConfirm: true,
+          confirmMessage: 'Confirm delete this post?',
+          handle: handleDeletePost
+        }
+      ]
+    }
+
+    return []
   }
 
   return (
@@ -71,9 +102,14 @@ export default function Post({ post, setPosts }: Props) {
               {format(new Date(post.createdAt), 'HH:mm dd/MM/yyyy')}
             </p>
           </div>
-          <Options
-            onDelete={() => handleDeletePost(post.id)}
-            username={post.user.username}
+          <Menu
+            classNameWrapButton="ml-auto"
+            classNameButton="rounded-full"
+            placement={{
+              x: 'left'
+            }}
+            className="right-0 w-[150px]"
+            menu={renderMenuOption()}
           />
         </div>
         <div className="border-t border-common-gray-medium mt-2 pt-2">
@@ -202,6 +238,24 @@ export default function Post({ post, setPosts }: Props) {
       </div>
       {isShow && (
         <ViewPost onClose={closePopup} post={post} setPosts={setPosts} />
+      )}
+      {updatePopup.isShow && (
+        <UpdatePost
+          isOpen={updatePopup.isShow}
+          onClose={updatePopup.closePopup}
+          onUpdated={(data) => {
+            updatePopup.closePopup()
+            setPosts((prev) => {
+              const post = prev.find((_post) => _post.id === data.id) as Post
+              post.content = data.content
+              post.medias = data.medias
+              post.type = data.type
+
+              return [...prev]
+            })
+          }}
+          {...post}
+        />
       )}
     </>
   )
