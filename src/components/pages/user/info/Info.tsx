@@ -37,6 +37,7 @@ interface User {
   }
   countFriend: number
   relation?: RelationWithUser
+  countSameFriend?: number
 }
 
 const relationMaping = {
@@ -165,7 +166,13 @@ export default function Info() {
           <div>
             <p className="text-4xl font-bold">{user?.name}</p>
             <p className="text-common-gray-dark font-bold ">
-              {user?.countFriend} friends
+              <span>{user?.countFriend} friends</span>
+              {!!user?.countSameFriend && (
+                <>
+                  <span className="px-1">-</span>
+                  <span>{user?.countSameFriend} same friend</span>
+                </>
+              )}
             </p>
           </div>
           <div className="ml-auto flex">
