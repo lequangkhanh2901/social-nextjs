@@ -10,6 +10,8 @@ import requestFriendSent from '~/public/icons/friend/request_friend_sent.svg'
 import requestFriendSentActive from '~/public/icons/friend/request_friend_sent_active.svg'
 import friend from '~/public/icons/friend/friend.svg'
 import friendActive from '~/public/icons/friend/friend_active.svg'
+import user from '~/public/icons/friend/user.svg'
+import userActive from '~/public/icons/friend/user_active.svg'
 
 const dataSideBar = [
   {
@@ -29,6 +31,12 @@ const dataSideBar = [
     icon: requestFriendSent,
     activeIcon: requestFriendSentActive,
     title: 'Request friend sent'
+  },
+  {
+    url: '/friends/suggest',
+    icon: user,
+    activeIcon: userActive,
+    title: 'Suggest friends'
   }
 ]
 
@@ -53,7 +61,7 @@ export default function SideBar() {
                   pathname === sideBar.url ? sideBar.activeIcon : sideBar.icon
                 }
                 alt=""
-                width={28}
+                width={24}
                 className=""
               />
             </div>
