@@ -71,7 +71,11 @@ export default function WrraperLayout({ children }: { children: ReactNode }) {
             changeLang
           }}
         >
-          <div id="wrapper-theme" data-theme={theme}>
+          <div
+            id="wrapper-theme"
+            data-theme={theme}
+            className="bg-common-gray-light"
+          >
             <Provider store={store}>{children}</Provider>
           </div>
           <Toaster

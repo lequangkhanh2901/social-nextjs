@@ -30,7 +30,7 @@ export default function ItemUser({ request, onCanceled }: Props) {
 
   return (
     <div className="rounded-md shadow-[0_1px_1px_#aaaaaaaa] overflow-hidden bg-common-white">
-      <Link href={`/user/${request.user_target.username}`}>
+      <Link href={`/user/@${request.user_target.username}`}>
         <Image
           src={request.user_target.avatarId.cdn}
           alt={request.user_target.name}
@@ -41,7 +41,7 @@ export default function ItemUser({ request, onCanceled }: Props) {
       </Link>
       <div className="p-2">
         <Link
-          href={`/user/${request.user_target.username}`}
+          href={`/user/@${request.user_target.username}`}
           className="text-lg font-bold hover:underline decoration-common-purble"
         >
           {request.user_target.username}

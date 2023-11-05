@@ -24,6 +24,7 @@ import edit from '~/public/icons/edit.svg'
 import Modal from '~/components/common/Modal/Modal'
 import ChangeAvatar from './ChangeAvatar'
 import Menu from '~/components/common/Menu'
+import { getUsername } from '~/helper/logic/method'
 
 interface User {
   id: string
@@ -60,7 +61,7 @@ const relationMaping = {
 }
 
 export default function Info() {
-  const { username } = useParams()
+  const username = decodeURIComponent(useParams().username)
   const pathname = usePathname()
 
   const { currentUser } = useAppSelector((state: RootState) => state.user)
@@ -154,7 +155,7 @@ export default function Info() {
               width={200}
               className="!border-4 !border-common-white shadow-[0_1px_4px_#00000040]"
             />
-            {currentUser.username === username && (
+            {currentUser.username === getUsername(username) && (
               <div
                 className="absolute bottom-[10%] right-[10%] p-2 bg-common-white rounded-full opacity-50 group-hover:opacity-100 cursor-pointer shadow-md"
                 onClick={openPopup}
@@ -176,9 +177,11 @@ export default function Info() {
             </p>
           </div>
           <div className="ml-auto flex">
-            {currentUser.username !== username && user && (
+            {currentUser.username !== getUsername(username) && user && (
               <Button
-                title={relationMaping[user?.relation as RelationWithUser].label}
+                title={
+                  relationMaping[user?.relation as RelationWithUser]?.label
+                }
                 prefixIcon={friended}
                 prefixClassName="w-4 h-4 object-cover"
                 isOutline={user?.relation === RelationWithUser.FRIEND}

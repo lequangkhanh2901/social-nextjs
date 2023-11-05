@@ -38,3 +38,6 @@ export const convertSecondsToHHMMSS = (time: number) => {
 
   return formatedTime
 }
+
+export const getUsername = (username: string) =>
+  username.replace(encodeURIComponent('@'), '')

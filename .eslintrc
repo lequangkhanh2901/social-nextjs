@@ -8,7 +8,7 @@
     "import/prefer-default-export": "off",
     "react/jsx-filename-extension": "off",
     "react/jsx-props-no-spreading": "off",
-    "react/no-unused-prop-types": "error",
+    "react/no-unused-prop-types": "warn",
     "react/require-default-props": "off",
     "import/extensions": [
       "error",

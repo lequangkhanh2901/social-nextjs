@@ -91,13 +91,13 @@ export default function Post({ post, setPosts }: Props) {
       <div className="rounded-lg shadow bg-common-white p-4 mt-4">
         <div className="flex gap-2 items-center">
           <Link
-            href={`/user/${post.user.username}`}
+            href={`/user/@${post.user.username}`}
             className="rounded-full w-fit"
           >
             <Avatar src={post.user.avatarId.cdn} width={40} />
           </Link>
           <div>
-            <Link href={`/user/${post.user.username}`}>{post.user.name}</Link>
+            <Link href={`/user/@${post.user.username}`}>{post.user.name}</Link>
             <p className="text-[13px] text-txt-gray">
               {format(new Date(post.createdAt), 'HH:mm dd/MM/yyyy')}
             </p>

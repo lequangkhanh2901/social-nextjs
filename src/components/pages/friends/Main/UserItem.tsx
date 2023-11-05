@@ -17,7 +17,7 @@ export default function UserItem({ user }: Props) {
   return (
     <div className="border border-common-gray-light rounded-lg overflow-hidden bg-common-white">
       <Link
-        href={`/user/${user.username}`}
+        href={`/user/@${user.username}`}
         className="relative aspect-square block"
       >
         <Image
@@ -29,7 +29,7 @@ export default function UserItem({ user }: Props) {
       </Link>
       <div className="p-2">
         <Link
-          href={`/user/${user.username}`}
+          href={`/user/@${user.username}`}
           className="font-bold text-common-gray-dark"
         >
           {user.name}

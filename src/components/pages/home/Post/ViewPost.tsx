@@ -128,14 +128,14 @@ export default function ViewPost({ post, onClose, setPosts }: Props) {
         >
           <div className="flex gap-2 px-2 mt-2">
             <Link
-              href={`user/${post.user.username}`}
+              href={`user/@${post.user.username}`}
               className="text-sm font-bold shrink-0"
             >
               <Avatar src={post.user.avatarId.cdn} width={40} />
             </Link>
             <div className="grow">
               <Link
-                href={`user/${post.user.username}`}
+                href={`user/@${post.user.username}`}
                 className="text-sm font-bold"
               >
                 {post.user.name}

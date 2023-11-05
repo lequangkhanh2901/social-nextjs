@@ -50,7 +50,8 @@ module.exports = {
       desktop: '1440px'
     },
     animation: {
-      'loading-sk': 'loading-sk 1s linear infinite'
+      'loading-sk': 'loading-sk 1s linear infinite',
+      'loading-rolling': 'loading-rolling 1.5s linear infinite'
     },
     keyframes: {
       'loading-sk': {
@@ -59,6 +60,14 @@ module.exports = {
         },
         '50%': {
           opacity: 0.5
+        }
+      },
+      'loading-rolling': {
+        '0%': {
+          rotate: '0deg'
+        },
+        '100%': {
+          rotate: '360deg'
         }
       }
     }

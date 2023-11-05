@@ -33,7 +33,7 @@ export default function ItemUser({ request, onAccepted }: Props) {
 
   return (
     <div className="rounded-md shadow-[0_1px_1px_#aaaaaaaa] overflow-hidden bg-common-white">
-      <Link href={`/user/${request.user.username}`}>
+      <Link href={`/user/@${request.user.username}`}>
         <Image
           src={request.user.avatarId.cdn}
           alt={request.user.name}
@@ -44,7 +44,7 @@ export default function ItemUser({ request, onAccepted }: Props) {
       </Link>
       <div className="p-2">
         <Link
-          href={`/user/${request.user.username}`}
+          href={`/user/@${request.user.username}`}
           className="text-lg font-bold hover:underline decoration-common-purble"
         >
           {request.user.username}

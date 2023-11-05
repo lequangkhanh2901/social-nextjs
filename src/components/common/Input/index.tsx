@@ -1,6 +1,7 @@
 import {
   ChangeEvent,
   HTMLInputTypeAttribute,
+  KeyboardEvent,
   ReactNode,
   useEffect,
   useId,
@@ -31,6 +32,7 @@ interface Props {
   description?: string
   rounded?: boolean
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+  onKeyUp?: (e: KeyboardEvent<HTMLInputElement>) => void
 }
 
 export default function Input({
@@ -48,7 +50,8 @@ export default function Input({
   inputBoxClassName = '',
   description,
   rounded,
-  onChange
+  onChange,
+  onKeyUp
 }: Props) {
   const [inputType, setInputType] = useState(type)
   const [errorHeigh, setErrorHeigh] = useState(0)
@@ -118,6 +121,7 @@ export default function Input({
           spellCheck={false}
           onChange={onChange}
           readOnly={disabled}
+          onKeyUp={onKeyUp}
         />
         {type === 'password' && (
           <Image

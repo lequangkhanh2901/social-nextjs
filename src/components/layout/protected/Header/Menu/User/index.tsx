@@ -54,7 +54,7 @@ export default function User() {
           onClick={(e) => e.stopPropagation()}
         >
           <Link
-            href={`/user/${currentUser.username}`}
+            href={`/user/@${currentUser.username}`}
             className="flex items-center gap-2 p-2 rounded-md hover:bg-common-gray-light"
           >
             <Avatar
