@@ -18,6 +18,7 @@ import Video from '~/components/common/Video'
 import AddComment from './AddComment'
 import { Comment } from '.'
 import ActionComment from './ActionComment'
+import { putRequest } from '~/services/client/putRequest'
 
 interface Props {
   comment: Comment
@@ -38,6 +39,9 @@ export default function CommentItem({
 }: Props) {
   const { isShow, togglePopup, closePopup } = usePopup()
   const [commentVal, setCommentVal] = useState('')
+  const [commentValEdit, setCommentValEdit] = useState(comment.content || '')
+  const [editing, setEditing] = useState(false)
+
   const [contentHeight, setContentHeight] = useState(0)
 
   const { currentUser } = useAppSelector((state: RootState) => state.user)
@@ -142,13 +146,68 @@ export default function CommentItem({
     }
   }
 
+  const handleUpdate = async (data?: { file?: File; cdn?: string }) => {
+    try {
+      let body: any
+
+      if (data?.file) {
+        body = new FormData()
+        body.append('id', comment.id)
+        body.append('content', commentValEdit)
+        body.append('file', data.file)
+      } else {
+        body = {
+          id: comment.id,
+          content: commentValEdit,
+          keepMedia: data?.cdn === comment.media?.cdn
+        }
+      }
+
+      const response: any = await putRequest('/comment', body, {
+        'Content-Type': data?.file ? 'multipart/form-data' : 'application/json'
+      })
+
+      setEditing(false)
+      setCommentValEdit(response.comment.content || '')
+      setComments((prev) => {
+        const _comment = prev.find((_cm) => _cm.id === comment.id) as Comment
+        _comment.content = response.comment.content
+        _comment.media = response.comment.media
+        return [...prev]
+      })
+    } catch (error) {
+      toast.error('Server error')
+      setCommentValEdit(comment.content || '')
+    }
+  }
+
+  if (editing)
+    return (
+      <AddComment
+        comment={commentValEdit}
+        onComment={handleUpdate}
+        setComment={setCommentValEdit}
+        edit={{
+          media: comment.media,
+          onCancel() {
+            setEditing(false)
+          }
+        }}
+      />
+    )
+
   return (
     <div
       className={`flex gap-2 mt-3 ${
         level === 2 ? 'ml-8' : level === 3 ? 'ml-16' : ''
       }`}
     >
-      <Avatar src={comment.user.avatarId.cdn} width={36 - (level - 1) * 4} />
+      <Avatar
+        src={comment.user.avatarId.cdn}
+        width={36 - (level - 1) * 4}
+        className="self-start"
+      />
+
       <div className="w-full group">
         <div className="w-fit max-w-[calc(100%-30px)] p-1 px-3 rounded-xl bg-common-gray-light relative">
           <Link href={`/user/${comment.user.username}`} className="font-bold">
@@ -174,6 +233,7 @@ export default function CommentItem({
           <ActionComment
             commentUsername={comment.user.username}
             onDelete={() => handleDelete(comment.id)}
+            onEdit={() => setEditing(true)}
           />
         </div>
         <div className="flex w-full gap-4 text-xs font-semibold text-common-gray-dark px-3 select-none">
@@ -201,7 +261,7 @@ export default function CommentItem({
             ref={boxRef}
             comment={commentVal}
             setComment={setCommentVal}
-            onComment={(file) => handleReply(file)}
+            onComment={(data) => handleReply(data?.file)}
           />
         </div>
       </div>

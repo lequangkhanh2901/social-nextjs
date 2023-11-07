@@ -200,7 +200,7 @@ export default function ViewPost({ post, onClose, setPosts }: Props) {
           ref={commentBoxRef}
           comment={comment}
           setComment={setComment}
-          onComment={handleComment}
+          onComment={(data) => handleComment(data?.file)}
         />
       </div>
     </Modal>

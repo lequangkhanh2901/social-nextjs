@@ -11,26 +11,36 @@ import {
 
 import { useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
+import { MediaType } from '~/helper/enum/post'
 
 import Avatar from '~/components/common/Avatar'
 import imagePlus from '~/public/icons/home/image_plus.svg'
 import send from '~/public/icons/send.svg'
 import sendActive from '~/public/icons/send_active.svg'
 import closeWhite from '~/public/icons/close_white.svg'
+import close from '~/public/icons/close.svg'
 
 interface Props {
   comment: string
+  edit?: {
+    media?: {
+      cdn: string
+      type: MediaType
+    }
+    onCancel: () => void
+  }
   setComment: Dispatch<SetStateAction<string>>
-  onComment: (file?: File) => void
+  onComment: (data?: { file?: File; cdn?: string }) => void
 }
 
 function AddComment(
-  { comment, setComment, onComment }: Props,
+  { comment, edit, setComment, onComment }: Props,
   ref: Ref<HTMLDivElement>
 ) {
   const { currentUser } = useAppSelector((state: RootState) => state.user)
   const [file, setFile] = useState<File>()
   const [previewFile, setPreviewFile] = useState('')
+  const [cdnMedia, setCdnMedia] = useState(edit?.media?.cdn || null)
   const idInputFile = useId()
 
   useEffect(() => {
@@ -49,21 +59,58 @@ function AddComment(
     >
       <Avatar src={currentUser.avatar} width={36} className="self-start" />
       <div className="grow bg-common-gray-light p-2 rounded-xl">
-        <textarea
-          value={comment}
-          placeholder="Comment"
-          className={`w-full block resize-none bg-[#00000000] outline-none px-1 h-6 text-txt-primary ${
-            file ? 'max-h-[100px]' : 'max-h-[200px]'
-          }`}
-          onChange={(e) => {
-            setComment(e.target.value)
-            e.target.style.height = ''
-            e.target.style.height = e.target.scrollHeight + 'px'
-          }}
-        ></textarea>
+        <div className="flex">
+          <textarea
+            value={comment}
+            placeholder="Comment"
+            className={`w-full block resize-none bg-[#00000000] outline-none px-1 h-6 text-txt-primary ${
+              file ? 'max-h-[100px]' : 'max-h-[200px]'
+            }`}
+            onChange={(e) => {
+              setComment(e.target.value)
+              e.target.style.height = ''
+              e.target.style.height = e.target.scrollHeight + 'px'
+            }}
+          ></textarea>
+          {edit && (
+            <button
+              className="p-1 rounded-full bg-common-gray-medium"
+              onClick={edit.onCancel}
+            >
+              <Image src={close} alt="cancel" width={16} height={16} />
+            </button>
+          )}
+        </div>
         <div className="pt-2 flex justify-between items-center">
           <div>
-            {file && previewFile ? (
+            {edit?.media && cdnMedia ? (
+              <div className="relative group">
+                {edit.media.type === MediaType.IMAGE ? (
+                  <Image
+                    src={cdnMedia}
+                    alt=""
+                    width={80}
+                    height={80}
+                    className="w-[80px] h-[80px] object-contain shadow-[0_0_2px_#00000055]"
+                  />
+                ) : (
+                  <video
+                    className="w-[80px] h-[80px] object-contain shadow-[0_0_2px_#00000055]"
+                    autoPlay
+                    // loop
+                    muted
+                  >
+                    <source src={cdnMedia} type="video/mp4" />
+                  </video>
+                )}
+                <div
+                  className="hidden group-hover:flex absolute top-0 right-0 cursor-pointer justify-center items-center w-5 h-5 rounded-full bg-common-gray-medium shadow-[0_0_2px_#00000055] hover:bg-common-gray-dark"
+                  onClick={() => setCdnMedia(null)}
+                >
+                  <Image src={closeWhite} alt="" width={16} />
+                </div>
+              </div>
+            ) : file && previewFile ? (
               <div className="relative group">
                 {file.type.startsWith('image') ? (
                   <Image
@@ -116,7 +163,7 @@ function AddComment(
             }`}
             onClick={() => {
               if (comment.trim() || file) {
-                onComment(file)
+                onComment({ file, cdn: cdnMedia || undefined })
                 setComment('')
                 setFile(undefined)
               }

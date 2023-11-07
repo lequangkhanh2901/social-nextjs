@@ -12,9 +12,14 @@ import edit from '~/public/icons/edit.svg'
 interface Props {
   commentUsername: string
   onDelete: () => void
+  onEdit: () => void
 }
 
-export default function ActionComment({ commentUsername, onDelete }: Props) {
+export default function ActionComment({
+  commentUsername,
+  onDelete,
+  onEdit
+}: Props) {
   const { isShow, togglePopup, closePopup } = usePopup()
   const { currentUser } = useAppSelector((state: RootState) => state.user)
 
@@ -40,7 +45,10 @@ export default function ActionComment({ commentUsername, onDelete }: Props) {
                   <Image src={bin} alt="" width={18} />
                   Delete
                 </div>
-                <div className="hover:bg-common-gray-light duration-100 px-2 py-1 rounded flex items-center gap-1">
+                <div
+                  className="hover:bg-common-gray-light duration-100 px-2 py-1 rounded flex items-center gap-1"
+                  onClick={onEdit}
+                >
                   <Image src={edit} alt="" width={18} />
                   Edit
                 </div>
