@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useThemeContext } from '~/components/layout/Wrapper'
 
 interface DrawerProps {
   children: ReactNode
@@ -17,6 +18,7 @@ function Drawer({
   setShow
 }: DrawerProps) {
   const [isShow, setIsShow] = useState(false)
+  const { theme } = useThemeContext()
 
   useEffect(() => {
     if (show) {
@@ -34,6 +36,7 @@ function Drawer({
   return createPortal(
     <div
       className="h-screen w-screen fixed inset-0 z-50 duration-300 backdrop-blur-[1px]"
+      id={`app-drawer-${theme}`}
       style={{
         backgroundColor: isShow ? '#80808080' : '#80808000'
       }}
@@ -42,7 +45,7 @@ function Drawer({
       <div
         className={`${
           placement === 'right' ? 'ml-auto' : ''
-        } bg-common-white h-full duration-300 p-1 shadow-md shadow-common-black`}
+        } bg-common-white h-full duration-300 shadow-md shadow-common-black`}
         style={{
           translate: isShow ? '0' : placement === 'left' ? '-100%' : '100%',
           width: `min(85% , ${width})`

@@ -11,7 +11,7 @@ import PostComponent from '../../home/Post'
 import PostSkeleton from '../../home/Post/Skeleton'
 
 export default function Main() {
-  const { username } = useParams()
+  const username = useParams().username as string
 
   const [posts, setPosts] = useState<Post[]>([])
   const [total, setTotal] = useState(0)

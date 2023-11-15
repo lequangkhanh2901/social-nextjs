@@ -1,5 +1,6 @@
 #wrapper-theme[data-theme='light'],
-.react-modal-light {
+.react-modal-light,
+#app-drawer-light {
   --background-primary: #eeeeee;
 
   --white: #ffffff;
@@ -22,7 +23,8 @@
 }
 
 #wrapper-theme[data-theme='dark'],
-.react-modal-dark {
+.react-modal-dark,
+#app-drawer-dark {
   --background-primary: #000;
 
   --white: #111111;

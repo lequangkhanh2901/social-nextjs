@@ -22,7 +22,7 @@ interface Props {
   onClick?: () => void
 }
 
-export default function GrayBackGrondButtom({
+export default function GrayBackGroundButtom({
   title,
   prefixIcon,
   prefixClassName,
@@ -63,7 +63,7 @@ export default function GrayBackGrondButtom({
         }
       }}
       className={twMerge(
-        'bg-common-gray-light rounded px-2 py-1 hover:bg-common-gray-medium',
+        'bg-common-gray-light rounded px-2 py-1 hover:bg-common-gray-medium relative',
         className,
         disabled && 'opacity-50 pointer-events-none select-none'
       )}
@@ -73,9 +73,9 @@ export default function GrayBackGrondButtom({
           <Image
             src={loaddindIcon}
             alt=""
-            width={22}
-            height={22}
-            className="animate-spin"
+            width={20}
+            height={20}
+            className="animate-loading-rolling"
           />
         </div>
       )}

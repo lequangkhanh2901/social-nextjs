@@ -15,6 +15,7 @@ import Modal from '~/components/common/Modal/Modal'
 
 import succcessImg from '~/public/images/common/success.png'
 import { useLanguageContext } from '~/components/layout/Wrapper'
+import { passwordStrength } from 'check-password-strength'
 
 export default function SignupForm() {
   const [isPosting, setIsPosting] = useState(false)
@@ -64,6 +65,7 @@ export default function SignupForm() {
             onChange={formik.handleChange}
             error={
               formik.errors.email &&
+              formik.touched.email &&
               (tValidate[formik.errors.email as keyof typeof tValidate] ||
                 formik.errors.email)
             }
@@ -74,9 +76,13 @@ export default function SignupForm() {
             type="password"
             value={formik.values.password}
             error={
-              formik.errors.password &&
-              (tValidate[formik.errors.password as keyof typeof tValidate] ||
-                formik.errors.password)
+              (formik.errors.password &&
+                formik.touched.password &&
+                (tValidate[formik.errors.password as keyof typeof tValidate] ||
+                  formik.errors.password)) ||
+              passwordStrength(formik.values.password).id <= 2
+                ? passwordStrength(formik.values.password).value
+                : undefined
             }
             onChange={formik.handleChange}
           />
@@ -85,6 +91,7 @@ export default function SignupForm() {
             type="submit"
             passClass="w-full"
             loadding={isPosting}
+            disabled={Object.keys(formik.errors).length > 0}
           />
         </form>
         <div className="mt-3 flex justify-between items-center">

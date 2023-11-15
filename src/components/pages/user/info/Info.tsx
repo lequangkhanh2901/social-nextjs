@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useParams, usePathname } from 'next/navigation'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 
 import { RelationWithUser, Sex, Status } from '~/helper/enum/user'
 import usePopup from '~/helper/hooks/usePopup'
+import { getUsername } from '~/helper/logic/method'
 import { useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
 
@@ -21,10 +22,11 @@ import Button from '~/components/common/Button'
 import requestFriend from '~/public/icons/friend/request_friend.svg'
 import friended from '~/public/icons/friend/friended.png'
 import edit from '~/public/icons/edit.svg'
+import chatActive from '~/public/icons/chat_active.svg'
 import Modal from '~/components/common/Modal/Modal'
-import ChangeAvatar from './ChangeAvatar'
 import Menu from '~/components/common/Menu'
-import { getUsername } from '~/helper/logic/method'
+import GrayBackGrondButtom from '~/components/common/Button/GrayBackGround'
+import ChangeAvatar from './ChangeAvatar'
 
 interface User {
   id: string
@@ -61,14 +63,16 @@ const relationMaping = {
 }
 
 export default function Info() {
-  const username = decodeURIComponent(useParams().username)
+  const username = decodeURIComponent(useParams().username as string)
   const pathname = usePathname()
+  const router = useRouter()
 
   const { currentUser } = useAppSelector((state: RootState) => state.user)
 
   const [user, setUser] = useState<User>()
   const [isLoading, setIsLoading] = useState(false)
   const { isShow, closePopup, openPopup } = usePopup()
+  const [loadingChat, setLoadingChat] = useState(false)
 
   useEffect(() => {
     ;(async () => {
@@ -144,6 +148,19 @@ export default function Info() {
     }
   }
 
+  const handleChatClick = async () => {
+    if (loadingChat) return
+    try {
+      setLoadingChat(true)
+      const data: any = await getRequest(`/conversation/${user?.id}/start`)
+      if (data.conversation) {
+        router.push(`/conversations/${data.conversation.id}/messages`)
+      }
+    } catch (error) {
+      setLoadingChat(false)
+    }
+  }
+
   return (
     <>
       <div className="bg-common-white p-5 rounded-md">
@@ -176,18 +193,28 @@ export default function Info() {
               )}
             </p>
           </div>
-          <div className="ml-auto flex">
+          <div className="ml-auto flex items-center gap-1">
             {currentUser.username !== getUsername(username) && user && (
-              <Button
-                title={
-                  relationMaping[user?.relation as RelationWithUser]?.label
-                }
-                prefixIcon={friended}
-                prefixClassName="w-4 h-4 object-cover"
-                isOutline={user?.relation === RelationWithUser.FRIEND}
-                onClick={handleClickAction}
-                loadding={isLoading}
-              />
+              <>
+                <Button
+                  title={
+                    relationMaping[user?.relation as RelationWithUser]?.label
+                  }
+                  prefixIcon={friended}
+                  prefixClassName="w-4 h-4 object-cover"
+                  isOutline={user?.relation === RelationWithUser.FRIEND}
+                  onClick={handleClickAction}
+                  loadding={isLoading}
+                />
+                {user.relation === RelationWithUser.FRIEND && (
+                  <GrayBackGrondButtom
+                    title=""
+                    prefixIcon={chatActive}
+                    loadding={loadingChat}
+                    onClick={handleChatClick}
+                  />
+                )}
+              </>
             )}
             <Menu
               // renderButton={<div>aaab</div>}

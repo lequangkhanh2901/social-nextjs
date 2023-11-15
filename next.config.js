@@ -9,7 +9,8 @@ const nextConfig = {
         port: '4000'
       }
     ]
-  }
+  },
+  reactStrictMode: false
 }
 
 module.exports = nextConfig

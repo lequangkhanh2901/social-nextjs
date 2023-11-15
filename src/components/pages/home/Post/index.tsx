@@ -142,7 +142,13 @@ export default function Post({ post, setPosts }: Props) {
                     height={500}
                     className="w-full max-h-[80vh] object-cover"
                   />
-                ) : null
+                ) : (
+                  <video
+                    src={post.medias[0].cdn}
+                    preload="metadata"
+                    className="aspect-square w-full object-cover"
+                  ></video>
+                )
               ) : (
                 post.medias.map((media, index) => {
                   if (index > 3) return null
