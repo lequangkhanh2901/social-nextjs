@@ -62,14 +62,37 @@ export default function ConversationItem({
     socket.on(`message-${id}-read`, handleReadMessage)
     socket.on(`message-${id}-read-all`, handleReadMessage)
     socket.on(`conversation-${id}-update`, handleSocketUpdate)
+    socket.on(`quit-conversation-${id}`, handleUserQuit)
 
     return () => {
       socket.off(`message-${id}`, handleSocketNewMessage)
       socket.off(`message-${id}-read`, handleReadMessage)
       socket.off(`message-${id}-read-all`, handleReadMessage)
       socket.off(`conversation-${id}-update`, handleSocketUpdate)
+      socket.off(`quit-conversation-${id}`, handleUserQuit)
     }
   }, [id])
+
+  useEffect(() => {
+    if (conversationId) {
+      if (type === ConversationType.GROUP && conversationId === id) {
+        if (unreadLastUsersId.includes(currentUser.id)) {
+          setConversations((prev) => {
+            const conversation = prev.find(
+              (_conversation) => _conversation.id === conversationId
+            ) as IConversation
+
+            conversation.unreadLastUsersId =
+              conversation.unreadLastUsersId.filter(
+                (userId) => userId !== currentUser.id
+              )
+
+            return [...prev]
+          })
+        }
+      }
+    }
+  }, [conversationId, id])
 
   const handleSocketNewMessage = ({ message: sMessage }: any) => {
     setConversations((prev) => {
@@ -83,6 +106,10 @@ export default function ConversationItem({
         userId: sMessage.user.id,
         viewStatus: sMessage.viewStatus,
         createdAt: sMessage.createdAt
+      }
+
+      if (type === ConversationType.GROUP && conversationId !== id) {
+        conversation.unreadLastUsersId.push(currentUser.id)
       }
 
       return [...prev]
@@ -117,6 +144,14 @@ export default function ConversationItem({
       ;(conversation.avatar as any).cdn = data.avatar.cdn
       return [...prev]
     })
+  }
+
+  const handleUserQuit = (userId: string) => {
+    if (userId === currentUser.id) {
+      setConversations((prev) =>
+        prev.filter((conversation) => conversation.id !== id)
+      )
+    }
   }
 
   return (

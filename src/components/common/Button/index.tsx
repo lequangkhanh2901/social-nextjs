@@ -80,7 +80,7 @@ function Button({
             alt=""
             width={22}
             height={22}
-            className="animate-spin"
+            className="animate-loading-rolling"
           />
         </div>
       )}

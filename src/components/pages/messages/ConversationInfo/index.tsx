@@ -5,14 +5,24 @@ import { toast } from 'react-hot-toast'
 
 import usePopup from '~/helper/hooks/usePopup'
 import { IUser } from '~/helper/type/user'
-import { ConversationStatus, ConversationType } from '~/helper/enum/message'
+import {
+  CallStatus,
+  ConversationRole,
+  ConversationStatus,
+  ConversationType
+} from '~/helper/enum/message'
 import { getRequest } from '~/services/client/getRequest'
+import { putRequest } from '~/services/client/putRequest'
+import { useAppDispatch, useAppSelector } from '~/redux/hooks'
+import { RootState } from '~/redux/store'
+import { startCall } from '~/redux/call/callSlice'
 
 import Avatar from '~/components/common/Avatar'
 import Drawer from '~/components/common/Drawer'
-import Menu from '~/components/common/Menu'
+import Menu, { TMenu } from '~/components/common/Menu'
 import Members from '../Members'
 import Info from '../Info'
+import Media from '../Media'
 
 export interface IConversationInfo {
   id: string
@@ -23,21 +33,23 @@ export interface IConversationInfo {
     id: string
   }
   users?: [IUser]
-  deputies: [
-    {
-      id: string
-    }
-  ]
+  deputies: {
+    id: string
+  }[]
   avatar?: {
     cdn: string
   }
   createdAt: string
+  unreadLastUsersId: string[]
 }
 
 export default function ConversationInfo() {
   const { conversationId } = useParams()
   const router = useRouter()
   const drawerPopup = usePopup()
+  const { socket } = useAppSelector((state: RootState) => state.socket)
+  const { currentUser } = useAppSelector((state: RootState) => state.user)
+  const dispatch = useAppDispatch()
 
   const [conversationInfo, setConversationInfo] =
     useState<IConversationInfo | null>(null)
@@ -64,6 +76,101 @@ export default function ConversationInfo() {
       setConversationInfo(null)
     }
   }, [conversationId])
+
+  useEffect(() => {
+    ;(async () => {
+      if (conversationInfo) {
+        try {
+          if (conversationInfo.unreadLastUsersId.includes(currentUser.id)) {
+            await putRequest(`/conversation/${conversationId}/read-last-group`)
+          }
+        } catch (error) {}
+      }
+    })()
+  }, [conversationInfo])
+
+  const renderMenu = () => {
+    const menu: TMenu = [
+      {
+        label: 'Media',
+        handle() {
+          setActiveKey('MEDIA')
+          drawerPopup.openPopup()
+        }
+      }
+    ]
+
+    if (conversationInfo?.type === ConversationType.GROUP) {
+      menu.push(
+        {
+          label: 'Chat info',
+          handle() {
+            setActiveKey('INFO')
+            drawerPopup.openPopup()
+          }
+        },
+        {
+          label: 'Member',
+          handle() {
+            setActiveKey('MEMBER')
+            drawerPopup.openPopup()
+          }
+        }
+      )
+      if (conversationInfo.chief?.id !== currentUser.id) {
+        menu.push({
+          label: 'Quit chat',
+          requireConfirm: true,
+          confirmMessage: (
+            <>
+              Confirm quit{' '}
+              <span className="font-bold text-common-purble text-xl">
+                {conversationInfo.name}
+              </span>
+              group
+            </>
+          ),
+          handle: handleQuitGroup
+        })
+      }
+    }
+
+    return menu
+  }
+
+  const handleStartCall = () => {
+    socket.emit('start-call', {
+      conversationId
+    })
+    dispatch(
+      startCall({
+        conversationId: conversationId as string,
+        status: CallStatus.START_CALL
+      })
+    )
+  }
+
+  const handleUpdatedRole = (userId: string, role: ConversationRole) => {
+    setConversationInfo((prev) => {
+      if (role === ConversationRole.VICE_CHIEF) {
+        prev?.deputies.push({
+          id: userId
+        })
+      } else {
+        ;(prev as IConversationInfo).deputies = (
+          prev as IConversationInfo
+        ).deputies.filter((user) => user.id !== userId)
+      }
+      return { ...(prev as IConversationInfo) }
+    })
+  }
+
+  const handleQuitGroup = async () => {
+    try {
+      await putRequest(`/conversation/${conversationId}/quit-group`)
+      router.replace('/conversations')
+    } catch (error) {}
+  }
 
   return (
     <>
@@ -93,24 +200,14 @@ export default function ConversationInfo() {
                   (conversationInfo.users as [IUser])[0].name}
               </h2>
             )}
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-3">
+              {conversationInfo.type === ConversationType.DUAL && (
+                <>
+                  <button onClick={handleStartCall}>start call</button>
+                </>
+              )}
               <Menu
-                menu={[
-                  {
-                    label: 'Chat info',
-                    handle() {
-                      setActiveKey('INFO')
-                      drawerPopup.openPopup()
-                    }
-                  },
-                  {
-                    label: 'Member',
-                    handle() {
-                      setActiveKey('MEMBER')
-                      drawerPopup.openPopup()
-                    }
-                  }
-                ]}
+                menu={renderMenu()}
                 placement={{
                   x: 'left'
                 }}
@@ -129,7 +226,15 @@ export default function ConversationInfo() {
           {(() => {
             switch (activeKey) {
               case 'MEMBER':
-                return <Members chiefId={conversationInfo?.chief?.id || ''} />
+                return (
+                  <Members
+                    chiefId={conversationInfo?.chief?.id || ''}
+                    viceChiefsId={
+                      conversationInfo?.deputies.map((user) => user.id) || []
+                    }
+                    onUpdatedRole={handleUpdatedRole}
+                  />
+                )
               case 'INFO':
                 return (
                   <Info
@@ -137,6 +242,8 @@ export default function ConversationInfo() {
                     setConversation={setConversationInfo}
                   />
                 )
+              case 'MEDIA':
+                return <Media />
               default:
                 return <div className="max-h-[100vh] overflow-y-auto">a</div>
             }

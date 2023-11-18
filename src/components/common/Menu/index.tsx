@@ -19,6 +19,8 @@ interface Props {
   classNameWrapButton?: string
 }
 
+export type TMenu = IMenuItem[]
+
 export default function Menu({
   placement = {
     x: 'center',

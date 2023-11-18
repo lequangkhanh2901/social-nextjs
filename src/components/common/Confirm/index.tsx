@@ -1,9 +1,10 @@
+import { ReactNode } from 'react'
 import Button from '../Button'
 import Modal from '../Modal/Modal'
 
 interface Props {
   isOpen: boolean
-  message?: string
+  message?: ReactNode
   onConfirm: () => void
   onCancel: () => void
 }

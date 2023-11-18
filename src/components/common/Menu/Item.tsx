@@ -1,4 +1,4 @@
-import { MouseEvent, useState } from 'react'
+import { MouseEvent, ReactNode, useState } from 'react'
 import Image, { StaticImageData } from 'next/image'
 import { twMerge } from 'tailwind-merge'
 
@@ -11,7 +11,7 @@ export interface MenuItem {
   icon?: string | StaticImageData
   className?: string
   requireConfirm?: true
-  confirmMessage?: string
+  confirmMessage?: ReactNode
   handle?: () => void
   subMenu?: SubmenuProps
 }

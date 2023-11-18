@@ -2,6 +2,8 @@ export const SERVER_API = process.env.NEXT_PUBLIC_SERVER_API
 export const REFRESH_EXPIRE = process.env.NEXT_PUBLIC_REFRESH_EXPIRE
   ? +process.env.NEXT_PUBLIC_REFRESH_EXPIRE
   : 7
+export const PEER_HOST = process.env.NEXT_PUBLIC_PEER_HOST
+export const PEER_PORT = +(process.env.NEXT_PUBLIC_PEER_PORT as string)
 
 //-----------------
 
