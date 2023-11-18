@@ -5,16 +5,69 @@ import { useLanguageContext } from '~/components/layout/Wrapper'
 
 import Button from '~/components/common/Button'
 import dots from '~/public/icons/dots.svg'
+import { INotification } from '.'
+import NotificationItem from './NotificationItem'
+import { useMemo } from 'react'
+import getDaysDiff from '~/helper/logic/getDaysDiff'
+import { format } from 'date-fns'
 
 interface Props {
   filter: 'ALL' | 'UNREAD'
-  // notifications: string[]
+  notifications: INotification[]
   onChangeFilter: (filter: 'ALL' | 'UNREAD') => void
+  onRead: (id: string, mode: 'MANUAL' | 'AUTO') => void
+  onDelete: (id: string) => void
 }
 
-export default function ListNotification({ filter, onChangeFilter }: Props) {
+export default function ListNotification({
+  filter,
+  notifications,
+  onChangeFilter,
+  onRead,
+  onDelete
+}: Props) {
   const { lang } = useLanguageContext()
   const { tCommon } = getDictionary(lang)
+
+  const sortedNotifications = useMemo(() => {
+    const data: {
+      [key: string]: INotification[]
+    } = {}
+
+    notifications.forEach((notification) => {
+      const daysDiff = getDaysDiff(new Date(notification.updatedAt))
+
+      switch (daysDiff) {
+        case 0:
+          if (data['Today']) {
+            data['Today'].push(notification)
+          } else {
+            data['Today'] = [notification]
+          }
+          break
+
+        case 1:
+          if (data['Yesterday']) {
+            data['Yesterday'].push(notification)
+          } else {
+            data['Yesterday'] = [notification]
+          }
+          break
+        default:
+          const dateString = format(
+            new Date(notification.updatedAt),
+            'dd/MM/yyyy'
+          )
+
+          if (data[dateString]) {
+            data[dateString].push(notification)
+          } else {
+            data[dateString] = [notification]
+          }
+      }
+    })
+    return data
+  }, [notifications])
 
   return (
     <div
@@ -40,6 +93,23 @@ export default function ListNotification({ filter, onChangeFilter }: Props) {
           isOutline={filter !== 'UNREAD'}
           onClick={() => onChangeFilter('UNREAD')}
         />
+      </div>
+      <div>
+        {Object.keys(sortedNotifications).map((key) => (
+          <div key={key}>
+            <p className="mt-1 underline text-common-gray-dark bg-common-gray-light rounded-t pl-2">
+              {key}
+            </p>
+            {sortedNotifications[key].map((notification) => (
+              <NotificationItem
+                key={notification.id}
+                {...notification}
+                onRead={onRead}
+                onDelete={onDelete}
+              />
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   )
