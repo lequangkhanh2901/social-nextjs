@@ -54,6 +54,8 @@ function ChatBox({
           src: URL.createObjectURL(file),
           type: file.type.startsWith('image')
             ? MediaType.IMAGE
+            : file.type.startsWith('application/pdf')
+            ? MediaType.PDF
             : MediaType.VIDEO
         }
       })
@@ -108,7 +110,7 @@ function ChatBox({
           }
         )
 
-        router.replace(`/conversations/${data.conversation.id}/message`)
+        router.replace(`/conversations/${data.conversation.id}/messages`)
       } catch (error) {}
 
       return
@@ -172,7 +174,7 @@ function ChatBox({
             <input
               id={id}
               type="file"
-              accept="image/png,image/jpeg,image/jpg,video/mp4"
+              accept="image/png,image/jpeg,image/jpg,video/mp4,application/pdf"
               className="hidden"
               multiple
               onChange={(e) => setFiles(Array.from(e.target.files as FileList))}
@@ -228,7 +230,7 @@ function ChatBox({
                     height={100}
                     className="object-cover aspect-square"
                   />
-                ) : (
+                ) : preview.type === MediaType.VIDEO ? (
                   <video
                     src={preview.src}
                     autoPlay
@@ -236,6 +238,10 @@ function ChatBox({
                     loop
                     className="object-cover aspect-square w-[100px]"
                   />
+                ) : (
+                  <div className="w-[100px] aspect-square overflow-hidden">
+                    {files[index]?.name}
+                  </div>
                 )}
 
                 <div

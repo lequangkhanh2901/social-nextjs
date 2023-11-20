@@ -63,7 +63,8 @@ const relationMaping = {
 }
 
 export default function Info() {
-  const username = decodeURIComponent(useParams().username as string)
+  const username = getUsername(useParams().username as string)
+
   const pathname = usePathname()
   const router = useRouter()
 
@@ -77,7 +78,7 @@ export default function Info() {
   useEffect(() => {
     ;(async () => {
       try {
-        const data = await getRequest(`/user/${username}`)
+        const data = await getRequest(`/user/@${username}`)
 
         setUser(data as User)
       } catch (error) {}
@@ -155,6 +156,8 @@ export default function Info() {
       const data: any = await getRequest(`/conversation/${user?.id}/start`)
       if (data.conversation) {
         router.push(`/conversations/${data.conversation.id}/messages`)
+      } else if (data.meta?.message === 'NOT_EXIST') {
+        router.push(`/conversations/start/@${user?.username}`)
       }
     } catch (error) {
       setLoadingChat(false)

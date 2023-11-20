@@ -7,6 +7,8 @@ import { getDictionary } from '~/locales'
 import { getRequest } from '~/services/client/getRequest'
 import { Post as IPost } from '~/helper/type/common'
 import useIsInView from '~/helper/hooks/useIsInView'
+import { useAppSelector } from '~/redux/hooks'
+import { RootState } from '~/redux/store'
 
 import Post from '../Post'
 import AddPost from '../AddPost'
@@ -20,6 +22,7 @@ export default function Main() {
 
   const { lang } = useLanguageContext()
   const { tCommon } = getDictionary(lang)
+  const { currentUser } = useAppSelector((state: RootState) => state.user)
 
   const showMoreRef = useRef<HTMLDivElement>(null)
   const isInView = useIsInView(showMoreRef)
@@ -54,9 +57,16 @@ export default function Main() {
     <>
       <AddPost setPosts={setPosts} />
       <div>
-        {posts.map((post) => (
-          <Post key={post.id} post={post} setPosts={setPosts} />
-        ))}
+        {posts.map((post) => {
+          if (
+            (post.type === ('CUSTOM_ONLY' as any) &&
+              !post.userIds?.includes(currentUser.id)) ||
+            (post.type === ('CUSTOM_EXCLUDE' as any) &&
+              post.userIds?.includes(currentUser.id))
+          )
+            return null
+          return <Post key={post.id} post={post} setPosts={setPosts} />
+        })}
       </div>
 
       <div

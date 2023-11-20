@@ -10,15 +10,18 @@ import { getDictionary } from '~/locales'
 import { useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
 import usePopup from '~/helper/hooks/usePopup'
-import { postTypes } from '~/helper/data/post'
-import { PostType, RegimePost } from '~/helper/enum/post'
+import { PostType, RegimeCreatePost as RegimePost } from '~/helper/enum/post'
 import { FileType, Post } from '~/helper/type/common'
+import useDebounce from '~/helper/hooks/useDebounce'
+import { IUser } from '~/helper/type/user'
 import { postRequest } from '~/services/client/postRequest'
+import { getRequest } from '~/services/client/getRequest'
 
 import Avatar from '~/components/common/Avatar'
 import Modal from '~/components/common/Modal/Modal'
 import Button from '~/components/common/Button'
 import Select from '~/components/common/Select'
+import Input from '~/components/common/Input'
 
 import addImage from '~/public/icons/home/image_plus_active.svg'
 import image from '~/public/icons/home/image_plus.svg'
@@ -44,6 +47,13 @@ export default function AddPost({
     }[]
   >([])
   const [loading, setLoading] = useState(false)
+  const [customType, setCustomType] = useState<'EXCLUDE' | 'ONLY'>('ONLY')
+  const [showCustom, setShowCustom] = useState(false)
+  const [search, setSearch] = useState('')
+  const searchDebounce = useDebounce(search)
+  const [listUser, setListUser] = useState<IUser[]>([])
+  const [selectedUser, setSelectedUser] = useState<IUser[]>([])
+
   const { lang } = useLanguageContext()
   const { tHome, tCommon } = getDictionary(lang)
 
@@ -64,6 +74,23 @@ export default function AddPost({
       previewMedia.forEach((preview) => URL.revokeObjectURL(preview.url))
     }
   }, [medias])
+
+  useEffect(() => {
+    ;(async () => {
+      if (!searchDebounce) return
+      try {
+        const data: any = await getRequest(`/friend/@${currentUser.username}`, {
+          params: {
+            limit: 10,
+            search: searchDebounce,
+            type: 'ALL'
+          }
+        })
+
+        setListUser(data.friends.map((friend: any) => friend.user))
+      } catch (error) {}
+    })()
+  }, [searchDebounce])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
@@ -95,12 +122,22 @@ export default function AddPost({
       if (medias && medias.length > 0) {
         body = new FormData()
         body.append('content', content)
-        body.append('type', regime)
+        body.append(
+          'type',
+          regime === RegimePost.CUSTOM
+            ? `${RegimePost.CUSTOM}_${customType}`
+            : regime
+        )
         medias.forEach((media) => body.append('medias', media))
+        selectedUser.forEach((user) => body.append('userIds', user.id))
       } else {
         body = {
           content,
-          type: regime
+          type:
+            regime === RegimePost.CUSTOM
+              ? `${RegimePost.CUSTOM}_${customType}`
+              : regime,
+          userIds: selectedUser.map((user) => user.id)
         }
       }
       const data: any = await postRequest('/post', body, {
@@ -196,12 +233,15 @@ export default function AddPost({
                 {currentUser.name}
               </p>
               <Select
-                data={postTypes.map((type) => ({
-                  key: type.value,
-                  label: tHome[type.key as keyof typeof tHome]
+                data={Object.keys(RegimePost).map((key) => ({
+                  key,
+                  label: key
                 }))}
                 currentActiveKey={regime}
-                onChange={(key) => setRegime(key as RegimePost)}
+                onChange={(key) => {
+                  if (key === RegimePost.CUSTOM) setShowCustom(true)
+                  setRegime(key as RegimePost)
+                }}
                 passClass="text-sm font-semibold border-0 rounded-full bg-common-gray-light py-[2px] hover:bg-common-gray-medium duration-100"
                 itemClassName="font-medium"
                 trigger="click"
@@ -314,6 +354,79 @@ export default function AddPost({
           />
         </div>
       </Modal>
+      {regime === RegimePost.CUSTOM && showCustom && (
+        <Modal isOpen onRequestClose={() => setShowCustom(false)}>
+          <div className="p-4 rounded-xl w-[400px]">
+            <h3 className="text-xl text-center py-2">
+              Custom Who can see this post
+            </h3>
+            <Select
+              data={[
+                {
+                  key: 'EXCLUDE',
+                  label: 'Exclude'
+                },
+                {
+                  key: 'ONLY',
+                  label: 'Only'
+                }
+              ]}
+              currentActiveKey={customType}
+              onChange={(key) => setCustomType(key as typeof customType)}
+              passClass="text-sm"
+            />
+            <Input
+              name=""
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search..."
+            />
+            <div className="py-2">
+              <h3>Selected User</h3>
+              <div className="flex flex-wrap">
+                {selectedUser.map((user, index) => (
+                  <div
+                    key={user.id}
+                    className="flex gap-1 items-center p-1 rounded hover:bg-common-gray-light cursor-pointer"
+                    onClick={() =>
+                      setSelectedUser((prev) => {
+                        prev.splice(index, 1)
+                        return [...prev]
+                      })
+                    }
+                  >
+                    <Avatar src={user.avatarId.cdn} width={24} />
+                    <p className="text-xs">{user.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="border-t py-2">
+              <h3>Available User</h3>
+              <div className="flex flex-wrap">
+                {listUser
+                  .filter(
+                    (user) =>
+                      !selectedUser.some((_user) => _user.id === user.id)
+                  )
+                  .map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex gap-1 items-center p-1 rounded hover:bg-common-gray-light cursor-copy"
+                      onClick={() => setSelectedUser((prev) => [...prev, user])}
+                    >
+                      <Avatar src={user.avatarId.cdn} width={24} />
+                      <p className="text-xs">{user.name}</p>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            <div>
+              <Button title="Comfirm" onClick={() => setShowCustom(false)} />
+            </div>
+          </div>
+        </Modal>
+      )}
     </>
   )
 }

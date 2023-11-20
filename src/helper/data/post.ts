@@ -1,16 +1,20 @@
-import { RegimePost } from '../enum/post'
+import { RegimeCreatePost } from '../enum/post'
 
 export const postTypes = [
   {
     key: 'public',
-    value: RegimePost.PUBLIC
+    value: RegimeCreatePost.PUBLIC
   },
   {
     key: 'private',
-    value: RegimePost.PRIVATE
+    value: RegimeCreatePost.PRIVATE
   },
   {
     key: 'onlyFriend',
-    value: RegimePost.ONLY_FRIEND
+    value: RegimeCreatePost.ONLY_FRIEND
+  },
+  {
+    key: 'cusTom',
+    value: RegimeCreatePost.CUSTOM
   }
 ]

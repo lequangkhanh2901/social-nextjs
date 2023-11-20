@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { toast } from 'react-hot-toast'
+import { Document, Page, pdfjs } from 'react-pdf'
 
 import { MediaType } from '~/helper/enum/post'
 import { Media } from '~/helper/type/common'
@@ -13,6 +14,12 @@ import Button from '~/components/common/Button'
 
 import play from '~/public/icons/play_solid_white.svg'
 import close from '~/public/icons/close_white.svg'
+import doc from '~/public/icons/document.svg'
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url
+).toString()
 
 export default function Media() {
   const conversationId = useParams().conversationId as string
@@ -25,6 +32,7 @@ export default function Media() {
     src: '',
     type: MediaType.IMAGE
   })
+  const [totalPages, setTotalPages] = useState<number>()
 
   useEffect(() => {
     ;(async () => {
@@ -48,6 +56,10 @@ export default function Media() {
       }
     })()
   }, [page])
+
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setTotalPages(numPages)
+  }
 
   return (
     <>
@@ -74,6 +86,15 @@ export default function Media() {
                   fill
                   className="object-cover rounded"
                 />
+              ) : media.type === MediaType.PDF ? (
+                <div className="w-full h-full flex items-center justify-center bg-common-gray-light rounded">
+                  <div className="relative w-2/3 aspect-square">
+                    <Image src={doc} alt="" fill className="opacity-30" />
+                    <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xl flex w-12 aspect-square rounded-full text-common-gray-dark backdrop-blur-[1px] bg-[#ffffff80] items-center justify-center">
+                      PDF
+                    </span>
+                  </div>
+                </div>
               ) : (
                 <div className="w-full h-full relative">
                   <video
@@ -113,6 +134,21 @@ export default function Media() {
               alt=""
               className="object-contain rounded-[inherit]"
             />
+          ) : view.type === MediaType.PDF ? (
+            <div className="overflow-y-auto max-h-full border border-common-purble">
+              <Document file={view.src} onLoadSuccess={onDocumentLoadSuccess}>
+                {[...Array(totalPages)]
+                  .map((x, i) => i + 1)
+                  .map((page) => (
+                    <Page
+                      key={page}
+                      pageNumber={page}
+                      renderTextLayer={false}
+                      renderAnnotationLayer={false}
+                    />
+                  ))}
+              </Document>
+            </div>
           ) : (
             <Video src={view.src} className="max-w-full max-h-full" />
           )}

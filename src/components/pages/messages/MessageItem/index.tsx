@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import Image from 'next/image'
+import { pdfjs } from 'react-pdf'
+import { Document, Page } from 'react-pdf'
+import { format } from 'date-fns'
 
 import { MessageStatus, MessageViewSatus } from '~/helper/enum/message'
 import { MediaType } from '~/helper/enum/post'
@@ -32,17 +35,28 @@ interface Props extends Message {
 
 const reg = /\bhttps?:\/\/\S+/gi
 
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url
+).toString()
+
 export default function MessageItem({
   user,
   medias,
   content,
-  viewStatus
+  viewStatus,
+  createdAt
 }: Props) {
   const { currentUser } = useAppSelector((state: RootState) => state.user)
   const [viewMedia, setViewMedia] = useState({
     src: '',
     type: MediaType.IMAGE
   })
+  const [totalPages, setTotalPages] = useState<number>()
+
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setTotalPages(numPages)
+  }
 
   return (
     <>
@@ -70,7 +84,7 @@ export default function MessageItem({
                         })
                       }
                     />
-                  ) : (
+                  ) : medias[0].type === MediaType.VIDEO ? (
                     <video
                       preload="metadata"
                       className="cursor-pointer"
@@ -83,6 +97,18 @@ export default function MessageItem({
                     >
                       <source src={medias[0].cdn} />
                     </video>
+                  ) : (
+                    <div
+                      className="cursor-pointer"
+                      onClick={() =>
+                        setViewMedia({
+                          src: medias[0].cdn,
+                          type: MediaType.PDF
+                        })
+                      }
+                    >
+                      PDF file
+                    </div>
                   )
                 ) : (
                   <div className="flex flex-wrap justify-between gap-2">
@@ -102,6 +128,10 @@ export default function MessageItem({
                             })
                           }
                         />
+                      ) : media.type === MediaType.PDF ? (
+                        <div className="w-[150px] relative cursor-pointer">
+                          PDF file
+                        </div>
                       ) : (
                         <div
                           key={media.id}
@@ -143,6 +173,9 @@ export default function MessageItem({
                 })()
               }}
             ></p>
+            <span className="text-[10px] text-common-gray-medium leading-3">
+              {format(new Date(createdAt), 'HH:mm')}
+            </span>
           </div>
         </div>
         {currentUser.id === user.id && (
@@ -177,9 +210,27 @@ export default function MessageItem({
             })
           }
         >
-          <div className="max-h-[90vh] max-w-[90vw] w-[90vw] h-[90vh] relative group flex justify-center items-center">
+          <div className="max-h-[90vh] max-w-[90vw] w-[90vw] h-[90vh] relative group flex justify-center items-center py-3">
             {viewMedia.type === MediaType.VIDEO ? (
               <Video src={viewMedia.src} className="max-w-full max-h-full" />
+            ) : viewMedia.type === MediaType.PDF ? (
+              <div className="overflow-y-auto max-h-full border border-common-purble">
+                <Document
+                  file={viewMedia.src}
+                  onLoadSuccess={onDocumentLoadSuccess}
+                >
+                  {[...Array(totalPages)]
+                    .map((x, i) => i + 1)
+                    .map((page) => (
+                      <Page
+                        key={page}
+                        pageNumber={page}
+                        renderTextLayer={false}
+                        renderAnnotationLayer={false}
+                      />
+                    ))}
+                </Document>
+              </div>
             ) : (
               <Image
                 fill

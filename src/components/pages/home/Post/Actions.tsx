@@ -12,7 +12,7 @@ import message from '~/public/icons/message.svg'
 interface Props {
   liked: boolean
   postId: string
-  setPosts: Dispatch<SetStateAction<Post[]>>
+  setPosts?: Dispatch<SetStateAction<Post[]>>
   onCommentClick?: () => void
 }
 
@@ -30,21 +30,21 @@ export default function Actions({
         id: postId,
         type: LikeType.POST
       })
+      if (setPosts)
+        setPosts((prev) => {
+          const postsTmp = [...prev]
+          const getPost = postsTmp.find(
+            (postTmp) => postTmp.id === postId
+          ) as Post
 
-      setPosts((prev) => {
-        const postsTmp = [...prev]
-        const getPost = postsTmp.find(
-          (postTmp) => postTmp.id === postId
-        ) as Post
+          getPost.likeData.isLiked = data.message === 'LIKED'
+          getPost.likeData.total =
+            data.message === 'LIKED'
+              ? getPost.likeData.total + 1
+              : getPost.likeData.total - 1
 
-        getPost.likeData.isLiked = data.message === 'LIKED'
-        getPost.likeData.total =
-          data.message === 'LIKED'
-            ? getPost.likeData.total + 1
-            : getPost.likeData.total - 1
-
-        return postsTmp
-      })
+          return postsTmp
+        })
     } catch (error) {}
   }
 

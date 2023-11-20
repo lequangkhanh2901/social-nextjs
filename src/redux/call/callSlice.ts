@@ -41,9 +41,13 @@ const callSlice = createSlice({
       }
     ) {
       state.call = action.payload
+    },
+    clearCall(state) {
+      state.call = initCall.call
     }
   }
 })
 
-export const { changeCallStatus, startCall, updateCall } = callSlice.actions
+export const { changeCallStatus, startCall, updateCall, clearCall } =
+  callSlice.actions
 export default callSlice

@@ -14,6 +14,7 @@ export interface Post {
     isLiked: boolean
   }
   totalComment: number
+  userIds?: string[]
 }
 
 export interface Media {

@@ -26,8 +26,7 @@ export default function CallBox() {
     myPeer.current = new Peer({
       host: PEER_HOST,
       port: PEER_PORT,
-      token: currentUser.id,
-      path: '/peer-server'
+      token: currentUser.id
     })
 
     socket.on(`call-ended-${conversationId}`, async () => {

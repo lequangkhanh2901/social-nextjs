@@ -2,19 +2,23 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 import { useChatScroll, useDataLoader } from 'use-chat-scroll'
+import { format } from 'date-fns'
 
 import { getRequest } from '~/services/client/getRequest'
 import { putRequest } from '~/services/client/putRequest'
 import { RootState } from '~/redux/store'
 import { useAppDispatch, useAppSelector } from '~/redux/hooks'
-import { changeCallStatus, updateCall } from '~/redux/call/callSlice'
+import { changeCallStatus, clearCall, updateCall } from '~/redux/call/callSlice'
 import { CallStatus, MessageViewSatus } from '~/helper/enum/message'
 import useIsInView from '~/helper/hooks/useIsInView'
+import getDaysDiff from '~/helper/logic/getDaysDiff'
 
 import Button from '~/components/common/Button'
 import Modal from '~/components/common/Modal/Modal'
+import loadingIcon from '~/public/icons/loading-dots.svg'
 import CallBox from '../Callbox'
 import ChatBox from '../ChatBox'
 import ConversationInfo from '../ConversationInfo'
@@ -56,6 +60,8 @@ export default function Main() {
     socket.on(`call-${conversationId}`, handleSocketCall)
     socket.on(`want-to-call-${conversationId}`, handleWantToCall)
     socket.on(`user-accepted-${conversationId}`, handleAcceptedCall)
+    socket.on(`cancel-call-${conversationId}`, handleUserCancelCall)
+    socket.on(`not-accept-call-${conversationId}`, handleSocketNotAcceptCall)
 
     return () => {
       socket.off(`message-${conversationId}`, handleSocketNewMessage)
@@ -67,7 +73,9 @@ export default function Main() {
       socket.off(`message-${conversationId}-read-all`, handleSocketReadAll)
       socket.off(`call-${conversationId}`, handleSocketCall)
       socket.off(`want-to-call-${conversationId}`, handleWantToCall)
-      socket.on(`user-accepted-${conversationId}`, handleAcceptedCall)
+      socket.off(`user-accepted-${conversationId}`, handleAcceptedCall)
+      socket.off(`cancel-call-${conversationId}`, handleUserCancelCall)
+      socket.off(`not-accept-call-${conversationId}`, handleSocketNotAcceptCall)
     }
   }, [conversationId, call.status])
 
@@ -119,7 +127,42 @@ export default function Main() {
     }
   }, [conversationId, isInit])
 
-  const sortMessage = useMemo(() => [...messages].reverse(), [messages])
+  const sortMessage = useMemo(() => {
+    const data: { [key: string]: Message[] } = {}
+
+    const messageTmp = [...messages].reverse()
+    messageTmp.forEach((message) => {
+      const daysDiff = getDaysDiff(new Date(message.createdAt))
+
+      switch (daysDiff) {
+        case 0:
+          if (data['Today']) {
+            data['Today'].push(message)
+          } else {
+            data['Today'] = [message]
+          }
+          break
+
+        case 1:
+          if (data['Yesterday']) {
+            data['Yesterday'].push(message)
+          } else {
+            data['Yesterday'] = [message]
+          }
+          break
+        default:
+          const dateString = format(new Date(message.createdAt), 'dd/MM/yyyy')
+
+          if (data[dateString]) {
+            data[dateString].push(message)
+          } else {
+            data[dateString] = [message]
+          }
+      }
+    })
+
+    return data
+  }, [messages])
 
   const isInView = useIsInView(loadMoreRef)
 
@@ -236,6 +279,31 @@ export default function Main() {
       )
   }
 
+  const handleCancelCall = () => {
+    socket.emit('cancel-call', conversationId)
+    dispatch(clearCall())
+  }
+
+  const handleUserCancelCall = () => {
+    // caller cancel
+
+    if (call.status === CallStatus.NOT_ACCEPT) {
+      dispatch(clearCall())
+    }
+  }
+
+  const handleNotAcceptCall = () => {
+    socket.emit('not-accept-call', conversationId)
+    dispatch(clearCall())
+  }
+
+  const handleSocketNotAcceptCall = () => {
+    if (call.status === CallStatus.START_CALL) {
+      toast.error('User not accept')
+      dispatch(clearCall())
+    }
+  }
+
   return (
     <>
       <div className="max-h-[calc(100vh-62px)] h-[calc(100vh-62px)] overflow-y-auto flex flex-col">
@@ -250,9 +318,17 @@ export default function Main() {
           >
             loading...
           </div>
-          {sortMessage.map((message) => {
-            return <MessageItem key={message.id} {...message} />
-          })}
+
+          {Object.keys(sortMessage).map((key) => (
+            <div key={key}>
+              <p className="mt-1 underline text-common-gray-dark rounded-t pl-2 text-center bg-common-white">
+                {key}
+              </p>
+              {sortMessage[key].map((message) => (
+                <MessageItem key={message.id} {...message} />
+              ))}
+            </div>
+          ))}
         </div>
         <div>
           <ChatBox onSent={handleSent} />
@@ -267,14 +343,39 @@ export default function Main() {
           }}
         >
           {call.status === CallStatus.NOT_ACCEPT ? (
-            <div>
-              <Button title="Accept" onClick={handleAcceptCall} />
+            <div className="w-[500px] p-5 rounded-md">
+              <p className="py-4 text-4xl">Want call to you!!!</p>
+              <div className="flex gap-4">
+                <Button
+                  title="Accept"
+                  onClick={handleAcceptCall}
+                  passClass="grow"
+                />
+                <Button
+                  title="Reject"
+                  onClick={handleNotAcceptCall}
+                  isOutline
+                  passClass="grow"
+                />
+              </div>
             </div>
           ) : call.status === CallStatus.IN_CALL ? (
             <CallBox />
           ) : call.status === CallStatus.START_CALL ? (
-            <div>
-              <p>wating</p>
+            <div className="w-[500px] p-5 rounded-md">
+              <p className="text-4xl font-bold text-center">Waiting</p>
+              <Image
+                src={loadingIcon}
+                alt="loading"
+                width={100}
+                className="animate-loading-rolling opacity-50 block mx-auto"
+              />
+              <Button
+                title="Cancel"
+                isOutline
+                passClass="w-1/2 mx-auto"
+                onClick={handleCancelCall}
+              />
             </div>
           ) : null}
         </Modal>
