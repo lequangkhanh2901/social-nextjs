@@ -7,16 +7,20 @@ import Button from '~/components/common/Button'
 import dots from '~/public/icons/dots.svg'
 import { INotification } from '.'
 import NotificationItem from './NotificationItem'
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import getDaysDiff from '~/helper/logic/getDaysDiff'
 import { format } from 'date-fns'
+import usePopup from '~/helper/hooks/usePopup'
+import useClickOutSide from '~/helper/hooks/useClickOutSide'
 
 interface Props {
   filter: 'ALL' | 'UNREAD'
   notifications: INotification[]
   onChangeFilter: (filter: 'ALL' | 'UNREAD') => void
   onRead: (id: string, mode: 'MANUAL' | 'AUTO') => void
+  onReadAll: () => void
   onDelete: (id: string) => void
+  onDeleteAll: () => void
 }
 
 export default function ListNotification({
@@ -24,10 +28,23 @@ export default function ListNotification({
   notifications,
   onChangeFilter,
   onRead,
-  onDelete
+  onReadAll,
+  onDelete,
+  onDeleteAll
 }: Props) {
   const { lang } = useLanguageContext()
   const { tCommon } = getDictionary(lang)
+
+  const actionRef = useRef<HTMLButtonElement>(null)
+  const { isShow, togglePopup, closePopup } = usePopup()
+
+  useClickOutSide(
+    () => {
+      if (isShow) closePopup()
+    },
+    actionRef,
+    [isShow]
+  )
 
   const sortedNotifications = useMemo(() => {
     const data: {
@@ -78,8 +95,28 @@ export default function ListNotification({
         <h3 className="text-lg font-semibold text-txt-primary">
           {tCommon.notification}
         </h3>
-        <button className="ml-auto flex items-center justify-center h-8 w-8 rounded-full bg-common-gray-light hover:bg-common-gray-medium">
+        <button
+          ref={actionRef}
+          className="ml-auto flex items-center justify-center h-8 w-8 rounded-full bg-common-gray-light hover:bg-common-gray-medium relative"
+          onClick={togglePopup}
+        >
           <Image src={dots} alt="" width={24} />
+          {isShow && (
+            <div className="absolute top-full right-0 w-[100px] bg-common-white shadow-[1px_2px_3px_#00000080] rounded-md text-sm text-left p-1">
+              <div
+                className="rounded hover:bg-common-gray-light px-1"
+                onClick={onReadAll}
+              >
+                Read all
+              </div>
+              <div
+                className="rounded hover:bg-common-gray-light px-1 text-common-danger"
+                onClick={onDeleteAll}
+              >
+                Delete all
+              </div>
+            </div>
+          )}
         </button>
       </div>
       <div className="flex gap-1 mt-2">

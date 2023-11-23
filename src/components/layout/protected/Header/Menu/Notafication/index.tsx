@@ -120,6 +120,19 @@ export default function Notification() {
     } catch (error) {}
   }
 
+  const handleReadAll = async () => {
+    try {
+      await putRequest('/notification/read-all')
+      setNotifications((prev) =>
+        prev.map((notification) => {
+          notification.isRead = true
+          return notification
+        })
+      )
+      setCountUnRead(0)
+    } catch (error) {}
+  }
+
   const handleDelete = async (id: string) => {
     try {
       await deleteRequest(`/notification/${id}/delete`)
@@ -130,6 +143,14 @@ export default function Notification() {
         prev.filter((notification) => notification.id !== id)
       )
       if (!notification.isRead) setCountUnRead((prev) => prev - 1)
+    } catch (error) {}
+  }
+
+  const handleDeleteAll = async () => {
+    try {
+      await deleteRequest('/notification/delete-all')
+      setNotifications([])
+      setCountUnRead(0)
     } catch (error) {}
   }
 
@@ -151,7 +172,9 @@ export default function Notification() {
           notifications={notifications}
           onChangeFilter={(filter) => setFilter(filter)}
           onRead={handleRead}
+          onReadAll={handleReadAll}
           onDelete={handleDelete}
+          onDeleteAll={handleDeleteAll}
         />
       )}
     </div>
