@@ -172,7 +172,9 @@ export default function AddPost({
             name: currentUser.name,
             username: currentUser.username
           },
-          totalComment: 0
+          totalComment: 0,
+          isOrigin: true,
+          originPost: null
         },
         ...prev
       ])

@@ -232,6 +232,8 @@ export default function CommentItem({
             ))}
           <ActionComment
             commentUsername={comment.user.username}
+            nameUser={comment.user.name}
+            commentId={comment.id}
             onDelete={() => handleDelete(comment.id)}
             onEdit={() => setEditing(true)}
           />

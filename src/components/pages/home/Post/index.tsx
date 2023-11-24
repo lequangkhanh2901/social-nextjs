@@ -16,6 +16,8 @@ import { RootState } from '~/redux/store'
 import Avatar from '~/components/common/Avatar'
 import Menu from '~/components/common/Menu'
 import { MenuItem as IMenuItem } from '~/components/common/Menu/Item'
+import Report from '~/components/common/Report'
+
 import likeActive from '~/public/icons/home/like_active.svg'
 import messageActive from '~/public/icons/message_active.svg'
 import bin from '~/public/icons/bin.svg'
@@ -39,6 +41,7 @@ export default function Post({ post, setPosts }: Props) {
   const { isShow, openPopup, closePopup } = usePopup()
   const updatePopup = usePopup()
   const sharePopup = usePopup()
+  const reportPopup = usePopup()
   const { currentUser } = useAppSelector((state: RootState) => state.user)
 
   useEffect(() => {
@@ -85,7 +88,12 @@ export default function Post({ post, setPosts }: Props) {
       ]
     }
 
-    return []
+    return [
+      {
+        label: 'Report',
+        handle: reportPopup.openPopup
+      }
+    ]
   }
 
   const handleShared = async (id: string) => {
@@ -240,6 +248,15 @@ export default function Post({ post, setPosts }: Props) {
           onClose={sharePopup.closePopup}
           post={post}
           onShared={handleShared}
+        />
+      )}
+
+      {reportPopup.isShow && (
+        <Report
+          nameUser={post.user.name}
+          onClose={reportPopup.closePopup}
+          type="POST"
+          postId={post.id}
         />
       )}
     </>
