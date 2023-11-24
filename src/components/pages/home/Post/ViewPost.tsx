@@ -1,4 +1,11 @@
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
@@ -51,6 +58,11 @@ export default function ViewPost({ post, onClose, setPosts }: Props) {
       if (resizeOfserver) resizeOfserver.disconnect()
     }
   }, [commentBoxRef.current])
+
+  const getMedia = useMemo(() => {
+    if (post.isOrigin) return post.medias
+    return post.originPost?.medias || []
+  }, [post])
 
   const handleComment = async (file?: File) => {
     try {
@@ -146,9 +158,35 @@ export default function ViewPost({ post, onClose, setPosts }: Props) {
               <Image src={dot} alt="" width={24} />
             </div>
           </div>
+          {!post.isOrigin &&
+            (post.originPost ? (
+              <div className="flex gap-2 px-2 mt-2 pl-5">
+                <Link
+                  href={`user/@${post.originPost.user.username}`}
+                  className="text-sm font-bold shrink-0"
+                >
+                  <Avatar src={post.originPost.user.avatarId.cdn} width={36} />
+                </Link>
+                <div className="grow">
+                  <Link
+                    href={`user/@${post.originPost.user.username}`}
+                    className="text-sm font-bold"
+                  >
+                    {post.user.name}
+                  </Link>
+                  <p className="text-sm font-light">
+                    {post.originPost.content}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="py-2 text-center">
+                Origin post has been deleted
+              </div>
+            ))}
           <div className="">
-            {post.medias.length > 0 &&
-              post.medias.map((media) => (
+            {getMedia.length > 0 &&
+              getMedia.map((media) => (
                 <div
                   key={media.id}
                   className=" border border-common-gray-medium mt-5"
@@ -187,6 +225,9 @@ export default function ViewPost({ post, onClose, setPosts }: Props) {
               liked={post.likeData.isLiked}
               postId={post.id}
               setPosts={setPosts}
+              onShare={() => {
+                //
+              }}
             />
           </div>
           <Comments

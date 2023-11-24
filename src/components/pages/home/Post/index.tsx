@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { toast } from 'react-hot-toast'
 
-import { MediaType } from '~/helper/enum/post'
 import { Post } from '~/helper/type/common'
 import { Post as IPost } from '~/helper/type/common'
 import { useLanguageContext } from '~/components/layout/Wrapper'
@@ -17,7 +16,6 @@ import { RootState } from '~/redux/store'
 import Avatar from '~/components/common/Avatar'
 import Menu from '~/components/common/Menu'
 import { MenuItem as IMenuItem } from '~/components/common/Menu/Item'
-import play from '~/public/icons/play_active.svg'
 import likeActive from '~/public/icons/home/like_active.svg'
 import messageActive from '~/public/icons/message_active.svg'
 import bin from '~/public/icons/bin.svg'
@@ -26,6 +24,9 @@ import edit from '~/public/icons/edit.svg'
 import ViewPost from './ViewPost'
 import Actions from './Actions'
 import UpdatePost from './UpdatePost'
+import Share from './Share'
+import MediasPreview from './MediasPreview'
+import { getRequest } from '~/services/client/getRequest'
 
 interface Props {
   post: Post
@@ -37,6 +38,7 @@ export default function Post({ post, setPosts }: Props) {
   const [isViewAll, setIsViewAll] = useState(false)
   const { isShow, openPopup, closePopup } = usePopup()
   const updatePopup = usePopup()
+  const sharePopup = usePopup()
   const { currentUser } = useAppSelector((state: RootState) => state.user)
 
   useEffect(() => {
@@ -86,6 +88,18 @@ export default function Post({ post, setPosts }: Props) {
     return []
   }
 
+  const handleShared = async (id: string) => {
+    try {
+      const post: any = await getRequest(`/post/${id}/get`)
+      setPosts((prev) => [post, ...prev])
+      sharePopup.closePopup()
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    } catch (error) {}
+  }
+
   return (
     <>
       <div className="rounded-lg shadow bg-common-white p-4 mt-4">
@@ -97,7 +111,12 @@ export default function Post({ post, setPosts }: Props) {
             <Avatar src={post.user.avatarId.cdn} width={40} />
           </Link>
           <div>
-            <Link href={`/user/@${post.user.username}`}>{post.user.name}</Link>
+            <Link href={`/user/@${post.user.username}`}>{post.user.name}</Link>{' '}
+            {!post.isOrigin && (
+              <span className="text-sm text-common-gray-dark">
+                shared a post
+              </span>
+            )}
             <p className="text-[13px] text-txt-gray">
               {format(new Date(post.createdAt), 'HH:mm dd/MM/yyyy')}
             </p>
@@ -128,96 +147,45 @@ export default function Post({ post, setPosts }: Props) {
               {tHome.viewMore}
             </span>
           )}
-          {post.medias.length > 0 && (
-            <div
-              className="flex flex-wrap cursor-pointer mt-1"
-              onClick={openPopup}
-            >
-              {post.medias.length === 1 ? (
-                post.medias[0].type === MediaType.IMAGE ? (
-                  <Image
-                    src={post.medias[0].cdn}
-                    alt=""
-                    width={800}
-                    height={500}
-                    className="w-full max-h-[80vh] object-cover"
+          {post.originPost && (
+            <div className="pl-3">
+              <div className="flex gap-2 items-center">
+                <Link
+                  href={`/user/@${post.originPost.user.username}`}
+                  className="rounded-full w-fit"
+                >
+                  <Avatar src={post.originPost.user.avatarId.cdn} width={36} />
+                </Link>
+                <div>
+                  <Link href={`/user/@${post.originPost.user.username}`}>
+                    {post.originPost.user.name}
+                  </Link>{' '}
+                  <p className="text-[13px] text-txt-gray">
+                    {format(
+                      new Date(post.originPost.createdAt),
+                      'HH:mm dd/MM/yyyy'
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: post.originPost.content.replace(/\n/g, '<br/>')
+                  }}
+                  className={'line-clamp-3'}
+                ></div>
+                {post.originPost.medias.length > 0 && (
+                  <MediasPreview
+                    medias={post.originPost.medias}
+                    onClick={openPopup}
                   />
-                ) : (
-                  <video
-                    src={post.medias[0].cdn}
-                    preload="metadata"
-                    className="aspect-square w-full object-cover"
-                  ></video>
-                )
-              ) : (
-                post.medias.map((media, index) => {
-                  if (index > 3) return null
-                  if (index === 3) {
-                    return (
-                      <div className="w-1/2 relative" key={media.id}>
-                        {media.type === MediaType.IMAGE ? (
-                          <Image
-                            alt=""
-                            src={media.cdn}
-                            width={800}
-                            height={500}
-                            className="aspect-square object-cover"
-                          />
-                        ) : (
-                          <video className="w-full h-full object-cover">
-                            <source src={media.cdn} />
-                          </video>
-                        )}
-                        {post.medias.length > 4 ? (
-                          <div className="absolute inset-0 bg-[#aaaaaa10] backdrop-blur-[1px] text-[60px] flex justify-center items-center text-common-white drop-shadow-[0_1px_2px_#aaaaaa] font-bold">
-                            {post.medias.length - 4}+
-                          </div>
-                        ) : (
-                          media.type === MediaType.VIDEO && (
-                            <div className="absolute inset-0 bg-[#aaaaaa10] backdrop-blur-[1px] flex justify-center items-center">
-                              <div className="w-12 h-12 flex justify-center items-center rounded-full bg-[#aaaaaaaa]">
-                                <Image src={play} alt="play" width={24} />
-                              </div>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    )
-                  }
-
-                  return (
-                    <div
-                      key={media.id}
-                      className="w-1/2 aspect-square relative"
-                    >
-                      {media.type === MediaType.IMAGE ? (
-                        <Image
-                          alt=""
-                          src={media.cdn}
-                          width={800}
-                          height={500}
-                          className="aspect-square object-cover"
-                        />
-                      ) : (
-                        <>
-                          <video
-                            className="w-full h-full object-cover"
-                            preload="metadata"
-                          >
-                            <source src={media.cdn} />
-                          </video>
-                          <div className="absolute inset-0 bg-[#aaaaaa10] backdrop-blur-[1px] flex justify-center items-center">
-                            <div className="w-12 h-12 flex justify-center items-center rounded-full bg-[#aaaaaaaa]">
-                              <Image src={play} alt="play" width={24} />
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )
-                })
-              )}
+                )}
+              </div>
             </div>
+          )}
+          {post.medias.length > 0 && (
+            <MediasPreview medias={post.medias} onClick={openPopup} />
           )}
         </div>
         <div className="py-1 border-y border-common-gray-light text-xs text-common-gray-dark flex gap-8">
@@ -240,6 +208,7 @@ export default function Post({ post, setPosts }: Props) {
           postId={post.id}
           setPosts={setPosts}
           onCommentClick={openPopup}
+          onShare={sharePopup.openPopup}
         />
       </div>
       {isShow && (
@@ -254,13 +223,23 @@ export default function Post({ post, setPosts }: Props) {
             setPosts((prev) => {
               const post = prev.find((_post) => _post.id === data.id) as Post
               post.content = data.content
-              post.medias = data.medias
-              post.type = data.type
+              if (post.isOrigin) {
+                post.medias = data.medias
+                post.type = data.type
+              }
 
               return [...prev]
             })
           }}
           {...post}
+        />
+      )}
+
+      {sharePopup.isShow && (
+        <Share
+          onClose={sharePopup.closePopup}
+          post={post}
+          onShared={handleShared}
         />
       )}
     </>

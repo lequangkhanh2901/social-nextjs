@@ -8,12 +8,14 @@ import { postRequest } from '~/services/client/postRequest'
 import like from '~/public/icons/home/like.svg'
 import likeActive from '~/public/icons/home/like_active.svg'
 import message from '~/public/icons/message.svg'
+import share from '~/public/icons/home/share.svg'
 
 interface Props {
   liked: boolean
   postId: string
   setPosts?: Dispatch<SetStateAction<Post[]>>
   onCommentClick?: () => void
+  onShare: () => void
 }
 
 export default function Actions({
@@ -22,7 +24,8 @@ export default function Actions({
   setPosts,
   onCommentClick = () => {
     //
-  }
+  },
+  onShare
 }: Props) {
   const handleLike = async () => {
     try {
@@ -64,9 +67,12 @@ export default function Actions({
         <Image src={message} alt="" width={20} />
         <p>Comment</p>
       </div>
-      <div className="hover:bg-common-gray-light duration-100 grow flex items-center gap-2 justify-center p-1 rounded cursor-pointer">
-        <Image src={like} alt="" width={20} />
-        <p>Like</p>
+      <div
+        className="hover:bg-common-gray-light duration-100 grow flex items-center gap-2 justify-center p-1 rounded cursor-pointer"
+        onClick={onShare}
+      >
+        <Image src={share} alt="" width={22} />
+        <p>Share</p>
       </div>
     </div>
   )

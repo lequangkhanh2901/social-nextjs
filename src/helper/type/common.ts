@@ -15,6 +15,8 @@ export interface Post {
   }
   totalComment: number
   userIds?: string[]
+  isOrigin: boolean
+  originPost: Omit<Post, 'originPost'> | null
 }
 
 export interface Media {

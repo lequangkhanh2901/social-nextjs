@@ -39,7 +39,9 @@ export default function UpdatePost({
   id,
   content,
   medias,
-  type
+  type,
+  isOrigin,
+  originPost
 }: Props & Post) {
   const { currentUser } = useAppSelector((state: RootState) => state.user)
   const [regime, setRegime] = useState(type)
@@ -112,35 +114,46 @@ export default function UpdatePost({
     if (loading) return
 
     try {
-      setLoading(true)
-      let body: any
+      let data: any
 
-      if (_medias && _medias.length) {
-        body = new FormData()
-        body.append('id', id)
-        body.append('content', content)
-        body.append('type', regime)
-        if (areadyExistMedias) {
-          areadyExistMedias.forEach((media) => {
-            body.append('keepMedia', media.id)
+      if (isOrigin) {
+        setLoading(true)
+        let body: any
+
+        if (_medias && _medias.length) {
+          body = new FormData()
+          body.append('id', id)
+          body.append('content', content)
+          body.append('type', regime)
+          if (areadyExistMedias) {
+            areadyExistMedias.forEach((media) => {
+              body.append('keepMedia', media.id)
+            })
+          }
+          _medias.forEach((_media) => {
+            body.append('medias', _media)
           })
+        } else {
+          body = {
+            id,
+            type: regime,
+            content: _content,
+            keepMedia: areadyExistMedias.map((media) => media.id)
+          }
         }
-        _medias.forEach((_media) => {
-          body.append('medias', _media)
+
+        data = await putRequest('/post', body, {
+          'Content-Type':
+            _medias && _medias.length
+              ? 'multipart/form-data'
+              : 'application/json'
         })
       } else {
-        body = {
-          id,
-          type: regime,
-          content: _content,
-          keepMedia: areadyExistMedias.map((media) => media.id)
-        }
+        data = await putRequest('/post/shared', {
+          postId: id,
+          content: _content
+        })
       }
-
-      const data: any = await putRequest('/post', body, {
-        'Content-Type':
-          _medias && _medias.length ? 'multipart/form-data' : 'application/json'
-      })
 
       toast.success('Updated')
 
@@ -167,19 +180,24 @@ export default function UpdatePost({
           <Avatar src={currentUser.avatar} width={40} />
           <div>
             <p className="font-extrabold text-txt-primary">
-              {currentUser.name}
+              {currentUser.name}{' '}
+              <span className="text-sm text-common-gray-medium">
+                share a post
+              </span>
             </p>
-            <Select
-              data={postTypes.map((type) => ({
-                key: type.value,
-                label: tHome[type.key as keyof typeof tHome]
-              }))}
-              currentActiveKey={regime}
-              onChange={(key) => setRegime(key as RegimePost)}
-              passClass="text-sm font-semibold border-0 rounded-full bg-common-gray-light py-[2px] hover:bg-common-gray-medium duration-100"
-              itemClassName="font-medium"
-              trigger="click"
-            />
+            {isOrigin && (
+              <Select
+                data={postTypes.map((type) => ({
+                  key: type.value,
+                  label: tHome[type.key as keyof typeof tHome]
+                }))}
+                currentActiveKey={regime}
+                onChange={(key) => setRegime(key as RegimePost)}
+                passClass="text-sm font-semibold border-0 rounded-full bg-common-gray-light py-[2px] hover:bg-common-gray-medium duration-100"
+                itemClassName="font-medium"
+                trigger="click"
+              />
+            )}
           </div>
         </div>
         <div className=" py-1 max-h-[calc(100vh-350px)] overflow-y-auto">
@@ -195,7 +213,13 @@ export default function UpdatePost({
               e.target.style.height = e.target.scrollHeight + 'px'
             }}
           ></textarea>
-          {postType === PostType.MEDIA && (
+          {originPost && (
+            <div className="flex gap-3 items-center">
+              <Avatar src={originPost.user.avatarId.cdn} width={36} />
+              <p>Post from {originPost.user.name}</p>
+            </div>
+          )}
+          {postType === PostType.MEDIA && isOrigin && (
             <>
               <div className="p-2 rounded-xl border border-common-gray-medium relative group">
                 <div
@@ -300,18 +324,19 @@ export default function UpdatePost({
           )}
         </div>
 
-        <div className="flex gap-2 my-2">
-          <div
-            className="flex justify-center items-center px-3 py-1 rounded bg-common-gray-light hover:bg-common-gray-medium duration-100 cursor-pointer"
-            onClick={() => setPostType(PostType.MEDIA)}
-          >
-            <Image
-              src={postType === PostType.MEDIA ? addImage : image}
-              alt=""
-              width={30}
-            />
-          </div>
-          {/* <div
+        {isOrigin && (
+          <div className="flex gap-2 my-2">
+            <div
+              className="flex justify-center items-center px-3 py-1 rounded bg-common-gray-light hover:bg-common-gray-medium duration-100 cursor-pointer"
+              onClick={() => setPostType(PostType.MEDIA)}
+            >
+              <Image
+                src={postType === PostType.MEDIA ? addImage : image}
+                alt=""
+                width={30}
+              />
+            </div>
+            {/* <div
               className="flex justify-center items-center px-3 py-1 rounded bg-common-gray-light hover:bg-common-gray-medium duration-100 cursor-pointer"
               onClick={() => setPostType(PostType.STATUS)}
             >
@@ -319,17 +344,20 @@ export default function UpdatePost({
                 src={postType === PostType.STATUS ? smile : smileNor}
                 alt=""
                 width={30}
-              />
-            </div> */}
-        </div>
+                />
+              </div> */}
+          </div>
+        )}
 
         <Button
           title="Update"
           passClass="w-full"
           disabled={
-            !_content.trim() &&
-            (!_medias || !_medias.length) &&
-            areadyExistMedias.length === 0
+            isOrigin
+              ? !_content.trim() &&
+                (!_medias || !_medias.length) &&
+                areadyExistMedias.length === 0
+              : false
           }
           loadding={loading}
           onClick={handleUpdatePost}

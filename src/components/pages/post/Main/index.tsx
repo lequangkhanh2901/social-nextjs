@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -39,6 +39,14 @@ export default function Main() {
       } catch (error) {}
     })()
   }, [postId])
+
+  const medias = useMemo(() => {
+    if (post) {
+      if (post.originPost?.medias) return post.originPost.medias
+      return post.medias
+    }
+    return []
+  }, [post])
 
   const handleComment = async (file?: File) => {
     try {
@@ -103,11 +111,41 @@ export default function Main() {
             >
               {post.user.name}
             </Link>
+            {!post.isOrigin && (
+              <span className="text-sm text-common-gray-medium">
+                {' '}
+                shared a post
+              </span>
+            )}
             <p className="text-sm font-light">{post.content}</p>
           </div>
         </div>
+        {!post.isOrigin &&
+          (post.originPost ? (
+            <div className="pl-3 flex mt-1 pt-1 border-t border-common-gray-light">
+              <Link
+                href={`user/@${post.originPost.user.username}`}
+                className="text-sm font-bold shrink-0 rounded-full"
+              >
+                <Avatar src={post.originPost.user.avatarId.cdn} width={40} />
+              </Link>
+              <div className="grow">
+                <Link
+                  href={`user/@${post.originPost.user.username}`}
+                  className="text-sm font-bold"
+                >
+                  {post.originPost.user.name}
+                </Link>
+
+                <p className="text-sm font-light">{post.originPost.content}</p>
+              </div>
+            </div>
+          ) : (
+            <p>This post has been deleted</p>
+          ))}
+
         <div>
-          {post.medias.map((media) => (
+          {medias.map((media) => (
             <div key={media.id}>
               {media.type === MediaType.IMAGE ? (
                 <Image
@@ -139,7 +177,13 @@ export default function Main() {
             )}
           </div>
 
-          <Actions liked={post.likeData.isLiked} postId={postId} />
+          <Actions
+            liked={post.likeData.isLiked}
+            postId={postId}
+            onShare={() => {
+              //
+            }}
+          />
           <Comments
             idPost={postId}
             ref={commentsRef}
