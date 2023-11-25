@@ -8,6 +8,7 @@ import { getRequest } from '~/services/client/getRequest'
 import { IConversation } from '~/helper/type/message'
 import { useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
+import socket from '~/untils/socket'
 
 import Menu from '~/components/common/Menu'
 import ConversationItem from './ConversationItem'
@@ -15,7 +16,6 @@ import ConversationItem from './ConversationItem'
 export default function SideBar() {
   const [conversations, setConversations] = useState<IConversation[]>([])
   const { currentUser } = useAppSelector((state: RootState) => state.user)
-  const { socket } = useAppSelector((state: RootState) => state.socket)
   const router = useRouter()
 
   useEffect(() => {

@@ -1,14 +1,16 @@
+import { Dispatch, SetStateAction, useEffect } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { Dispatch, SetStateAction, useEffect } from 'react'
-import Avatar from '~/components/common/Avatar'
+
 import { ConversationType, MessageViewSatus } from '~/helper/enum/message'
 import usePopup from '~/helper/hooks/usePopup'
 import { IConversation } from '~/helper/type/message'
 import { useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
 import { putRequest } from '~/services/client/putRequest'
+import socket from '~/untils/socket'
 
+import Avatar from '~/components/common/Avatar'
 import Menu from '~/components/common/Menu'
 
 export interface User {
@@ -52,7 +54,6 @@ export default function ConversationItem({
 }: Props) {
   const { conversationId } = useParams()
   const { currentUser } = useAppSelector((state: RootState) => state.user)
-  const { socket } = useAppSelector((state: RootState) => state.socket)
   // eslint-disable-next-line
   const { isShow, togglePopup } = usePopup()
   const router = useRouter()

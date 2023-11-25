@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { Role } from '~/helper/enum/user'
 
 const initUser = {
   currentUser: {
@@ -8,7 +9,7 @@ const initUser = {
     email: '',
     actived: false,
     status: '',
-    role: '',
+    role: Role.NORMAL,
     avatar: ''
   }
 }

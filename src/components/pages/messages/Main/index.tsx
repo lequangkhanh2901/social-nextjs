@@ -15,6 +15,7 @@ import { changeCallStatus, clearCall, updateCall } from '~/redux/call/callSlice'
 import { CallStatus, MessageViewSatus } from '~/helper/enum/message'
 import useIsInView from '~/helper/hooks/useIsInView'
 import getDaysDiff from '~/helper/logic/getDaysDiff'
+import socket from '~/untils/socket'
 
 import Button from '~/components/common/Button'
 import Modal from '~/components/common/Modal/Modal'
@@ -29,7 +30,6 @@ const loadAdditionalData = () => []
 export default function Main() {
   const { conversationId } = useParams()
   const router = useRouter()
-  const { socket } = useAppSelector((state: RootState) => state.socket)
   const { currentUser } = useAppSelector((state: RootState) => state.user)
   const { call } = useAppSelector((state: RootState) => state.call)
   const dispatch = useAppDispatch()

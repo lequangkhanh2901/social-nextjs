@@ -1,12 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
+import { toast } from 'react-hot-toast'
 
 import usePopup from '~/helper/hooks/usePopup'
 import useDebounce from '~/helper/hooks/useDebounce'
 import { IUser } from '~/helper/type/user'
+import { ConversationRole } from '~/helper/enum/message'
 import { getRequest } from '~/services/client/getRequest'
 import { postRequest } from '~/services/client/postRequest'
+import { putRequest } from '~/services/client/putRequest'
+import { deleteRequest } from '~/services/client/deleteRequest'
+import socket from '~/untils/socket'
+import { RootState } from '~/redux/store'
+import { useAppSelector } from '~/redux/hooks'
 
 import Avatar from '~/components/common/Avatar'
 import Button from '~/components/common/Button'
@@ -15,12 +22,6 @@ import Input from '~/components/common/Input'
 import Menu, { TMenu } from '~/components/common/Menu'
 import Modal from '~/components/common/Modal/Modal'
 import addUser from '~/public/icons/friend/request_friend_active.svg'
-import { deleteRequest } from '~/services/client/deleteRequest'
-import { toast } from 'react-hot-toast'
-import { ConversationRole } from '~/helper/enum/message'
-import { useAppSelector } from '~/redux/hooks'
-import { RootState } from '~/redux/store'
-import { putRequest } from '~/services/client/putRequest'
 
 interface Props {
   chiefId: string
@@ -44,7 +45,6 @@ export default function Members({
   const searchDebounce = useDebounce(search, 500)
   const searchDebounceInvite = useDebounce(searchInvite)
   const { currentUser } = useAppSelector((state: RootState) => state.user)
-  const { socket } = useAppSelector((state: RootState) => state.socket)
 
   useEffect(() => {
     getMember()

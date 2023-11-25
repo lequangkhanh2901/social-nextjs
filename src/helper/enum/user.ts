@@ -16,3 +16,9 @@ export enum RelationWithUser {
   WAITING_ACCEPT_BY_USER = 'WAITING_ACCEPT_BY_USER',
   WAITING_ACCEPT_BY_ME = 'WAITING_ACCEPT_BY_ME'
 }
+
+export enum Role {
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+  NORMAL = 'NORMAL'
+}

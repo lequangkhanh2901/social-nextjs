@@ -1,22 +1,21 @@
 'use client'
 
-import { ReactNode, useEffect, useLayoutEffect, useState } from 'react'
+import { ReactNode, useLayoutEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 
+import { Role } from '~/helper/enum/user'
 import { useAppDispatch, useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
-import { clearUser, updateUser } from '~/redux/user/userSlice'
+import { updateUser } from '~/redux/user/userSlice'
 import { getRequest } from '~/services/client/getRequest'
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '~/settings/constants'
-import { getCookie, removeCookies } from '~/untils/clientCookie'
-import socket from '~/untils/socket'
+import { getCookie } from '~/untils/clientCookie'
 
-import LoadingScreen from '~/components/common/LoadingScreen'
-import Header from '~/components/layout/message/Header'
-import SideBar from '~/components/layout/message/SideBar'
+import SideBar from '~/components/layout/manager/SideBar'
+import Header from '~/components/layout/manager/Header'
 
-export default function ProtectedLayout({ children }: { children: ReactNode }) {
+export default function Lauyout({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   const pathname = usePathname()
@@ -36,20 +35,16 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
           if (!currentUser.actived) {
             router.replace('/user/setup')
           } else {
+            if (currentUser.role !== Role.MANAGER) {
+              router.replace('/')
+              return
+            }
           }
         }
       }
       setIsLoading(false)
     })()
   }, [currentUser, pathname])
-
-  useEffect(() => {
-    socket.on(`ban-user-${currentUser.id}`, handleSocketBanAccount)
-
-    return () => {
-      socket.off(`ban-user-${currentUser.id}`, handleSocketBanAccount)
-    }
-  }, [currentUser])
 
   const getMe = async () => {
     try {
@@ -60,26 +55,17 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
     }
   }
 
-  const handleSocketBanAccount = () => {
-    toast.error('Your accout has been banned')
-    removeCookies([ACCESS_TOKEN, REFRESH_TOKEN])
-    dispatch(clearUser())
-    router.replace('/login')
-  }
-
   return (
-    <div>
-      {isLoading ? (
-        <LoadingScreen />
-      ) : currentUser.id ? (
-        <>
-          <Header />
-          <main className="max-w-[1440px] mx-auto min-h-[calc(100vh-62px)] flex">
-            <SideBar />
-            <div className="grow">{children}</div>
-          </main>
-        </>
-      ) : null}
-    </div>
+    <>
+      {!isLoading && (
+        <div className="min-h-screen flex">
+          <SideBar />
+          <div className="grow">
+            <Header />
+            {children}
+          </div>
+        </div>
+      )}
+    </>
   )
 }

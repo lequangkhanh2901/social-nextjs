@@ -1,15 +1,17 @@
 'use client'
 
-import { ReactNode, useLayoutEffect, useState } from 'react'
+import { ReactNode, useEffect, useLayoutEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 
 import { useAppDispatch, useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
-import { updateUser } from '~/redux/user/userSlice'
+import { clearUser, updateUser } from '~/redux/user/userSlice'
 import { getRequest } from '~/services/client/getRequest'
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '~/settings/constants'
-import { getCookie } from '~/untils/clientCookie'
+import { getCookie, removeCookies } from '~/untils/clientCookie'
+import socket from '~/untils/socket'
+import { Role } from '~/helper/enum/user'
 
 import LoadingScreen from '~/components/common/LoadingScreen'
 import Header from '~/components/layout/protected/Header'
@@ -30,16 +32,32 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
         if (!currentUser.id) {
           setIsLoading(true)
           await getMe()
+        } else if (currentUser.role === Role.ADMIN) {
+          router.replace('/admin/dashboard')
+          return
         } else {
-          if (!currentUser.actived) {
+          if (!currentUser.actived && pathname !== '/user/setup') {
             router.replace('/user/setup')
+            return
           } else {
+            if (currentUser.role === Role.MANAGER) {
+              router.replace('/manager')
+              return
+            }
           }
         }
       }
       setIsLoading(false)
     })()
   }, [currentUser, pathname])
+
+  useEffect(() => {
+    socket.on(`ban-user-${currentUser.id}`, handleSocketBanAccount)
+
+    return () => {
+      socket.off(`ban-user-${currentUser.id}`, handleSocketBanAccount)
+    }
+  }, [currentUser])
 
   const getMe = async () => {
     try {
@@ -48,6 +66,13 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
     } catch (error: any) {
       toast.error('System error')
     }
+  }
+
+  const handleSocketBanAccount = () => {
+    toast.error('Your accout has been banned')
+    removeCookies([ACCESS_TOKEN, REFRESH_TOKEN])
+    dispatch(clearUser())
+    router.replace('/login')
   }
 
   return (

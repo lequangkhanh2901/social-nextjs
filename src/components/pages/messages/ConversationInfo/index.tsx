@@ -16,6 +16,7 @@ import { putRequest } from '~/services/client/putRequest'
 import { useAppDispatch, useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
 import { startCall } from '~/redux/call/callSlice'
+import socket from '~/untils/socket'
 
 import Avatar from '~/components/common/Avatar'
 import Drawer from '~/components/common/Drawer'
@@ -47,7 +48,6 @@ export default function ConversationInfo() {
   const { conversationId } = useParams()
   const router = useRouter()
   const drawerPopup = usePopup()
-  const { socket } = useAppSelector((state: RootState) => state.socket)
   const { currentUser } = useAppSelector((state: RootState) => state.user)
   const dispatch = useAppDispatch()
 

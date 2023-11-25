@@ -4,3 +4,15 @@ export enum ReportReason {
   VIOLATE_THE_RULES = 'VIOLATE_THE_RULES',
   SENSITIVE_CONTENT_OF_CHILDREN = 'SENSITIVE_CONTENT_OF_CHILDREN'
 }
+
+export enum ResolveStatus {
+  NONE = 'NONE',
+  REJECTED = 'REJECTED',
+  ACCEPTED = 'ACCEPTED'
+}
+
+export enum AcceptAction {
+  DELETE_ORIGIN = 'DELETE_ORIGIN',
+  WARN_USER = 'WARN_USER',
+  BAN_USER = 'BAN_USER'
+}

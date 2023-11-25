@@ -8,12 +8,12 @@ import { updateCall } from '~/redux/call/callSlice'
 import { useAppDispatch, useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
 import { PEER_HOST, PEER_PORT } from '~/settings/constants'
+import socket from '~/untils/socket'
 
 import Button from '~/components/common/Button'
 
 export default function CallBox() {
   const { currentUser } = useAppSelector((state: RootState) => state.user)
-  const { socket } = useAppSelector((state: RootState) => state.socket)
   const { call } = useAppSelector((state: RootState) => state.call)
   const dispatch = useAppDispatch()
   const myVideo = useRef<HTMLVideoElement>(null)

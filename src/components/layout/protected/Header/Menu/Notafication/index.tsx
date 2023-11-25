@@ -9,6 +9,7 @@ import { putRequest } from '~/services/client/putRequest'
 import { deleteRequest } from '~/services/client/deleteRequest'
 import { useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
+import socket from '~/untils/socket'
 
 import bell from '~/public/icons/layout/header/bell.svg'
 import bellActive from '~/public/icons/layout/header/bell_active.svg'
@@ -36,7 +37,6 @@ export default function Notification() {
   // eslint-disable-next-line
   const [total, setTotal] = useState(0)
   const [countUnread, setCountUnRead] = useState(0)
-  const { socket } = useAppSelector((state: RootState) => state.socket)
   const { currentUser } = useAppSelector((state: RootState) => state.user)
 
   useEffect(() => {

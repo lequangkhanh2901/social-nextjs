@@ -11,6 +11,7 @@ import { ConversationType, MessageViewSatus } from '~/helper/enum/message'
 import { getRequest } from '~/services/client/getRequest'
 import { useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
+import socket from '~/untils/socket'
 
 import chat from '~/public/icons/chat.svg'
 import chatActive from '~/public/icons/chat_active.svg'
@@ -20,7 +21,6 @@ export default function Message() {
   const { isShow, togglePopup, closePopup } = usePopup()
   const [conversations, setConversations] = useState<IConversation[]>([])
   const { currentUser } = useAppSelector((state: RootState) => state.user)
-  const { socket } = useAppSelector((state: RootState) => state.socket)
   const ref = useRef<HTMLDivElement>(null)
   useClickOutSide(
     () => {
