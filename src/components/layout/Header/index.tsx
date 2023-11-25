@@ -1,22 +1,35 @@
 'use client'
 
-import Image from 'next/image'
 import { useState } from 'react'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
+import { ACCESS_TOKEN, REFRESH_TOKEN } from '~/settings/constants'
+import { removeCookies } from '~/untils/clientCookie'
+import { clearUser } from '~/redux/user/userSlice'
+import { useAppDispatch } from '~/redux/hooks'
 import { useThemeContext } from '../Wrapper'
-import moreIcon from '~/public/icons/more.png'
+
+import Logo from '~/components/common/Logo'
 import Drawer from '../../common/Drawer'
-import ChangeTheme from '../ChangeTheme'
-import Logo from '../Logo'
-import SwitchLang from '../SwitchLang'
+import logout from '~/public/icons/layout/header/logout.svg'
+import moreIcon from '~/public/icons/more.png'
 
 function Header() {
   const [isShowDrawer, setIsShowDrawer] = useState(false)
+  const dispatch = useAppDispatch()
+  const router = useRouter()
 
   const { theme } = useThemeContext()
 
   const handleShowDrawer = (e: boolean) => {
     setIsShowDrawer(e)
+  }
+
+  const handleLogout = () => {
+    removeCookies([ACCESS_TOKEN, REFRESH_TOKEN])
+    dispatch(clearUser())
+    router.replace('/login')
   }
   return (
     <>
@@ -33,10 +46,13 @@ function Header() {
         />
         <span></span>
         <Logo className="miniTablet:hidden h-12" />
-        <div className="shrink-0 flex gap-2 items-center">
-          <SwitchLang />
-          <ChangeTheme />
-        </div>
+        <div className="shrink-0 flex gap-2 items-center"></div>
+        <button
+          className="p-1 hover:bg-common-gray-light rounded-full gap-4"
+          onClick={handleLogout}
+        >
+          <Image src={logout} alt="logout" width={24} />
+        </button>
       </header>
       {isShowDrawer && (
         <Drawer show={isShowDrawer} setShow={handleShowDrawer} placement="left">

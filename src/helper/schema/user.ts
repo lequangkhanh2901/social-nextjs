@@ -11,3 +11,8 @@ export const SETUP_USER_SCHEMA = object({
     .matches(/^[A-Za-z0-9]+$/, 'wrongFormat'),
   sex: mixed<Sex>().oneOf(Object.values(Sex)).required('isRequired')
 })
+
+export const CREATE_MANAGER = object({
+  email: string().trim().email().required().min(6).max(30),
+  password: string().trim().required().min(6).max(30)
+})

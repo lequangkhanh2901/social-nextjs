@@ -27,7 +27,7 @@ export default function Main() {
         setReports(data.reports)
       } catch (error) {}
     })()
-  }, [])
+  }, [page])
 
   return (
     <div className="m-5 p-5 rounded-xl bg-common-white">

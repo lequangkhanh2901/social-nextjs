@@ -24,7 +24,7 @@ export default function SideBar() {
 
   return (
     <div className="sticky top-0 left-0 h-screen overflow-y-auto w-1/5 bg-common-white py-4 px-2 shrink-0">
-      <Logo className="text-center" />
+      <Logo className="text-center text-6xl" href="/manager" />
       {data.map((item, index) => (
         <Link
           key={index}

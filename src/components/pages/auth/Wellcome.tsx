@@ -11,7 +11,7 @@ export default function Wellcome() {
   return (
     <div className="h-full bg-common-white flex justify-center items-center flex-col">
       <h1 className="text-[#f06] text-3xl miniTablet:text-5xl font-bold ">
-        Le Quang Khanh
+        KAN
       </h1>
       <p className="text-common-black mt-3">{tCommon.wellcome}</p>
     </div>

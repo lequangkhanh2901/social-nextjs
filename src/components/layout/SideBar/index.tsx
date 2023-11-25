@@ -1,20 +1,21 @@
 'use client'
 
-import Image from 'next/image'
 import { useEffect, useState } from 'react'
-
-import ritghArrowIcon from '~/public/icons/rightArrow.png'
-import Logo from '../Logo'
-import { SideBarMenu } from '~/helper/type/layout'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
+
+import { SideBarMenu } from '~/helper/type/layout'
 import { useThemeContext } from '../Wrapper'
+
+import Logo from '~/components/common/Logo'
+import ritghArrowIcon from '~/public/icons/rightArrow.png'
 
 interface SideBarProps {
   menu: SideBarMenu[]
 }
 
 function SideBar({ menu }: SideBarProps) {
-  const [isCollapse, setIscollapse] = useState(true)
+  const [isCollapse, setIscollapse] = useState(false)
 
   const router = useRouter()
   const pathname = usePathname()
@@ -42,7 +43,7 @@ function SideBar({ menu }: SideBarProps) {
         isCollapse ? 'w-16' : 'w-[260px]'
       } bg-common-white h-screen sticky z-20 duration-300 top-0 shrink-0 hidden miniTablet:flex flex-col`}
     >
-      <Logo />
+      <Logo className="text-7xl text-center" href="/admin/dashboard" />
       <button
         className={`${
           isCollapse ? '' : 'rotate-180'

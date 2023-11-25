@@ -1,36 +1,32 @@
-import moonIcon from '~/public/icons/moon.png'
-import sunIcon from '~/public/icons/sun.png'
+import dashboard from '~/public/icons/layout/dashboard.svg'
+import users from '~/public/icons/layout/users.svg'
+import posts from '~/public/icons/layout/posts.svg'
+import managers from '~/public/icons/layout/managers.svg'
 
 const sideBarMenu = [
   {
     key: 1,
-    icon: moonIcon,
+    icon: dashboard,
     label: 'Dashboard',
-    link: '/'
+    link: '/admin/dashboard'
   },
   {
     key: 2,
-    icon: sunIcon,
-    label: 'Dashboard',
-    link: '/dashboard'
+    icon: users,
+    label: 'Users',
+    link: '/admin/users'
   },
   {
     key: 3,
-    icon: moonIcon,
-    label: 'Test',
-    link: '/test'
+    icon: posts,
+    label: 'Posts',
+    link: '/admin/posts'
   },
   {
     key: 4,
-    icon: sunIcon,
-    label: 'Dashboard',
-    link: '/c'
-  },
-  {
-    key: 5,
-    icon: moonIcon,
-    label: 'Dashboard',
-    link: '/manager/dashboard'
+    icon: managers,
+    label: 'Managers',
+    link: '/admin/managers'
   }
 ]
 

@@ -2,7 +2,7 @@ import * as en from './en'
 import * as vi from './vi'
 
 export const dictionaries = {
-  defaultLocale: 'vi',
+  defaultLocale: 'en',
   locales: {
     en,
     vi
