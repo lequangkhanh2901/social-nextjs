@@ -16,10 +16,8 @@ export default function RequestMain() {
 
   const fetchData = async () => {
     try {
-      const data = (await getRequest(
-        '/request-friend/receive'
-      )) as RequestFriend[]
-      setRequests(data)
+      const data: any = await getRequest('/request-friend/receive')
+      setRequests(data.requests)
     } catch (error) {
       toast.error('Server error')
     }

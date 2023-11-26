@@ -108,15 +108,19 @@ export default function CallBox() {
   }
 
   return (
-    <div className="max-w-[90vw] w-[500px] p-5 rounded-xl">
-      <div className=" w-full">
+    <div className="max-w-[90vw] w-[400px] p-5 rounded-xl">
+      <div className="w-full relative">
         <video
           src=""
           ref={myVideo}
-          className="aspect-video w-[200px]"
+          className="aspect-[3/4] w-[80px] absolute top-0 right-0 object-cover"
           muted
         ></video>
-        <video src="" ref={oponentVideo}></video>
+        <video
+          src=""
+          ref={oponentVideo}
+          className="aspect-[3/4] object-cover w-full"
+        ></video>
       </div>
       <div className="flex justify-evenly">
         <Button title="End call" onClick={handleEndCall} />

@@ -88,23 +88,23 @@ export default function Info() {
   const navs = useMemo(
     () => [
       {
-        url: `/user/${username}`,
+        url: `/user/@${username}`,
         label: 'Post'
       },
       {
-        url: `/user/${username}/introduce`,
+        url: `/user/@${username}/introduce`,
         label: 'Introduce'
       },
       {
-        url: `/user/${username}/friends`,
+        url: `/user/@${username}/friends`,
         label: 'Friends'
       },
       {
-        url: `/user/${username}/photos`,
+        url: `/user/@${username}/photos`,
         label: 'Photos'
       },
       {
-        url: `/user/${username}/videos`,
+        url: `/user/@${username}/videos`,
         label: 'Videos'
       }
     ],
@@ -171,7 +171,11 @@ export default function Info() {
         <div className="flex px-9 items-end w-full -mt-[100px] ">
           <div className="relative rounded-full group">
             <Avatar
-              src={user?.avatarId.cdn}
+              src={
+                currentUser.username === getUsername(username)
+                  ? currentUser.avatar
+                  : user?.avatarId.cdn
+              }
               width={200}
               className="!border-4 !border-common-white shadow-[0_1px_4px_#00000040]"
             />
@@ -273,7 +277,7 @@ export default function Info() {
       </div>
 
       <Modal isOpen={isShow} onRequestClose={closePopup}>
-        <ChangeAvatar />
+        <ChangeAvatar onUpdated={closePopup} />
       </Modal>
     </>
   )

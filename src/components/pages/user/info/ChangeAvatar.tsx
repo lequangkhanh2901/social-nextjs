@@ -1,16 +1,25 @@
 import { useEffect, useId, useState } from 'react'
 import Image from 'next/image'
+import { toast } from 'react-hot-toast'
 
-import { useAppSelector } from '~/redux/hooks'
+import { useAppDispatch, useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
+import { updatePartialUser } from '~/redux/user/userSlice'
+import { putRequest } from '~/services/client/putRequest'
+
 import Button from '~/components/common/Button'
 
-export default function ChangeAvatar() {
+interface Props {
+  onUpdated: () => void
+}
+
+export default function ChangeAvatar({ onUpdated }: Props) {
   const [file, setFile] = useState<File | null>(null)
   const [previewSrc, setPreivewSrc] = useState<string | null>(null)
   const id = useId()
 
   const { currentUser } = useAppSelector((state: RootState) => state.user)
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     if (file) {
@@ -24,6 +33,24 @@ export default function ChangeAvatar() {
       }
     }
   }, [file])
+
+  const handleChange = async () => {
+    try {
+      const body = new FormData()
+      body.append('avatar', file as File)
+      const { data }: any = await putRequest('/user/avatar', body, {
+        'Content-Type': 'multipart/form-data'
+      })
+      dispatch(
+        updatePartialUser({
+          avatar: data.cdn
+        })
+      )
+      onUpdated()
+    } catch (error) {
+      toast.error('Server error')
+    }
+  }
 
   return (
     <div className="p-5 w-[500px] max-w-[90vw]">
@@ -48,7 +75,12 @@ export default function ChangeAvatar() {
           onChange={(e) => setFile((e.target.files as FileList)[0])}
         />
       </label>
-      <Button title="Update" disabled={!file} passClass="w-full mt-2" />
+      <Button
+        title="Update"
+        disabled={!file}
+        passClass="w-full mt-2"
+        onClick={handleChange}
+      />
     </div>
   )
 }

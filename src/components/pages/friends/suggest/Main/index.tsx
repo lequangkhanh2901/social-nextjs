@@ -114,7 +114,7 @@ export default function Main() {
         }))
       }
     }
-  }, [isInView])
+  }, [isInView, isInitRequest.same])
 
   useEffect(() => {
     if (users.same.length === totals.same) {

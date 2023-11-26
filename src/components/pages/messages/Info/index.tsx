@@ -6,6 +6,8 @@ import { format } from 'date-fns'
 import usePopup from '~/helper/hooks/usePopup'
 import { ConversationStatus } from '~/helper/enum/message'
 import { putRequest } from '~/services/client/putRequest'
+import { useAppSelector } from '~/redux/hooks'
+import { RootState } from '~/redux/store'
 
 import Button from '~/components/common/Button'
 import Modal from '~/components/common/Modal/Modal'
@@ -16,11 +18,16 @@ import edit from '~/public/icons/edit.svg'
 import { IConversationInfo } from '../ConversationInfo'
 
 interface Props {
+  chiefId: string
   conversation: IConversationInfo
   setConversation: Dispatch<SetStateAction<IConversationInfo | null>>
 }
 
-export default function Info({ conversation, setConversation }: Props) {
+export default function Info({
+  chiefId,
+  conversation,
+  setConversation
+}: Props) {
   const { isShow, openPopup, closePopup } = usePopup()
   const [avatar, setAvatar] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -28,6 +35,7 @@ export default function Info({ conversation, setConversation }: Props) {
   const [groupStatus, setGroupStatus] = useState(conversation.status)
   const [loading, setLoading] = useState(false)
   const idInputAvatar = useId()
+  const { currentUser } = useAppSelector((state: RootState) => state.user)
 
   useEffect(() => {
     if (avatar) setPreview(URL.createObjectURL(avatar))
@@ -104,13 +112,15 @@ export default function Info({ conversation, setConversation }: Props) {
             Created at: {format(new Date(conversation.createdAt), 'dd/MM/yyyy')}
           </p>
 
-          <Button
-            title="Update"
-            passClass="w-full mt-5"
-            subfixIcon={edit}
-            subfixClassName="invert w-6"
-            onClick={openPopup}
-          />
+          {currentUser.id === chiefId && (
+            <Button
+              title="Update"
+              passClass="w-full mt-5"
+              subfixIcon={edit}
+              subfixClassName="invert w-6"
+              onClick={openPopup}
+            />
+          )}
         </div>
       </div>
       <Modal isOpen={isShow} onRequestClose={closePopup}>

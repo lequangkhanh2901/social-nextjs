@@ -238,6 +238,7 @@ export default function ConversationInfo() {
               case 'INFO':
                 return (
                   <Info
+                    chiefId={conversationInfo?.chief?.id || ''}
                     conversation={conversationInfo as IConversationInfo}
                     setConversation={setConversationInfo}
                   />
