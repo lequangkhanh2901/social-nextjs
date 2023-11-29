@@ -1,6 +1,5 @@
 import dashboard from '~/public/icons/layout/dashboard.svg'
 import users from '~/public/icons/layout/users.svg'
-import posts from '~/public/icons/layout/posts.svg'
 import managers from '~/public/icons/layout/managers.svg'
 
 const sideBarMenu = [
@@ -16,12 +15,12 @@ const sideBarMenu = [
     label: 'Users',
     link: '/admin/users'
   },
-  {
-    key: 3,
-    icon: posts,
-    label: 'Posts',
-    link: '/admin/posts'
-  },
+  // {
+  //   key: 3,
+  //   icon: posts,
+  //   label: 'Posts',
+  //   link: '/admin/posts'
+  // },
   {
     key: 4,
     icon: managers,

@@ -43,7 +43,12 @@ function SideBar({ menu }: SideBarProps) {
         isCollapse ? 'w-16' : 'w-[260px]'
       } bg-common-white h-screen sticky z-20 duration-300 top-0 shrink-0 hidden miniTablet:flex flex-col`}
     >
-      <Logo className="text-7xl text-center" href="/admin/dashboard" />
+      <Logo
+        className={`text-center duration-300 ${
+          isCollapse ? 'text-2xl' : 'text-7xl'
+        }`}
+        href="/admin/dashboard"
+      />
       <button
         className={`${
           isCollapse ? '' : 'rotate-180'

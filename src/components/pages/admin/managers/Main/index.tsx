@@ -9,12 +9,12 @@ import { CREATE_MANAGER } from '~/helper/schema/user'
 import { IUser } from '~/helper/type/user'
 import { getRequest } from '~/services/client/getRequest'
 
-import Avatar from '~/components/common/Avatar'
 import Button from '~/components/common/Button'
 import Input from '~/components/common/Input'
 import Modal from '~/components/common/Modal/Modal'
 import Pagination from '~/components/common/Pagination'
 import Title from '~/components/common/Title'
+import ManagerItem from '../ManagerItem'
 
 export default function Main() {
   const searchParams = useSearchParams()
@@ -62,13 +62,7 @@ export default function Main() {
         <div className="mt-5 rounded-lg bg-common-white p-5">
           <div className="flex gap-5 justify-between flex-wrap">
             {managers.map((manager) => (
-              <div
-                key={manager.id}
-                className="p-2 rounded-md border border-common-gray-medium hover:shadow-[0_1px_4px_#0ff]"
-              >
-                <Avatar src={manager.avatarId.cdn} alt="" width={100} />
-                <p>{manager.name}</p>
-              </div>
+              <ManagerItem key={manager.id} {...manager} />
             ))}
           </div>
           <Pagination current={+page} perPage={10} total={total} />

@@ -15,11 +15,12 @@ import Tooltip from '~/components/common/Tooltip'
 import Modal from '~/components/common/Modal/Modal'
 import Video from '~/components/common/Video'
 import CheckBox from '~/components/common/CheckBox'
+import Button from '~/components/common/Button'
+import Input from '~/components/common/Input'
 
 import show from '~/public/icons/show.png'
 import tick from '~/public/icons/tick-circle-outline.svg'
 import close from '~/public/icons/close.svg'
-import Button from '~/components/common/Button'
 
 export interface Report {
   id: string
@@ -74,6 +75,7 @@ export default function ReportItem({
   const acceptPopup = usePopup()
 
   const [actions, setActions] = useState<AcceptAction[]>([])
+  const [banTime, setTimeBan] = useState(1)
 
   const handleReject = async () => {
     try {
@@ -88,7 +90,8 @@ export default function ReportItem({
   const handleAccept = async () => {
     try {
       await putRequest(`/report/${id}/accept`, {
-        actions
+        actions,
+        time: banTime
       })
 
       toast.success('Handled')
@@ -273,6 +276,18 @@ export default function ReportItem({
                 }
               />
             </div>
+
+            {actions.includes(AcceptAction.BAN_USER) && (
+              <Input
+                label="Time ban"
+                type="number"
+                name=""
+                value={banTime + ''}
+                onChange={(e) => setTimeBan(+e.target.value)}
+                subfix={<span>days</span>}
+                className="grow"
+              />
+            )}
 
             <Button
               title="Confirm"

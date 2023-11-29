@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Bar } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
@@ -59,22 +60,28 @@ export default function Main() {
       </div>
 
       <div className="flex mt-5 gap-5">
-        <div className="p-5 rounded-lg bg-common-white aspect-square w-[200px] relative">
+        <Link
+          href="/admin/users/list"
+          className="p-5 rounded-lg bg-common-white aspect-square w-[200px] relative"
+        >
           <span className="h-full flex items-center justify-center text-7xl font-bold border-[10px] border-common-purble rounded-full">
             {totalUser.totalUser}
           </span>
           <span className="absolute bottom-[20%] left-1/2 -translate-x-1/2">
             Total user
           </span>
-        </div>
-        <div className="p-5 rounded-lg bg-common-white aspect-square w-[200px] relative">
+        </Link>
+        <Link
+          href="/admin/users/banned"
+          className="p-5 rounded-lg bg-common-white aspect-square w-[200px] relative"
+        >
           <span className="h-full flex items-center justify-center text-7xl font-bold border-[10px] border-common-danger text-common-danger rounded-full">
             {totalUser.totalBannedUser}
           </span>
           <span className="absolute bottom-[20%] left-1/2 -translate-x-1/2 whitespace-nowrap">
             Total banned user
           </span>
-        </div>
+        </Link>
       </div>
 
       <div className="grid grid-cols-12 mt-5 gap-x-5">
