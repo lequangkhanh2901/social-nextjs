@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast'
 import usePopup from '~/helper/hooks/usePopup'
 import useDebounce from '~/helper/hooks/useDebounce'
 import { IUser } from '~/helper/type/user'
-import { ConversationRole } from '~/helper/enum/message'
+import { ConversationRole, ConversationStatus } from '~/helper/enum/message'
 import { getRequest } from '~/services/client/getRequest'
 import { postRequest } from '~/services/client/postRequest'
 import { putRequest } from '~/services/client/putRequest'
@@ -42,12 +42,16 @@ export default function Members({
   const [search, setSearch] = useState('')
   const [searchInvite, setSearchInvite] = useState('')
   const [users, setUsers] = useState<IUser[]>([])
+  const [status, setStatus] = useState<ConversationStatus>(
+    ConversationStatus.PRIVATE
+  )
   const searchDebounce = useDebounce(search, 500)
   const searchDebounceInvite = useDebounce(searchInvite)
   const { currentUser } = useAppSelector((state: RootState) => state.user)
 
   useEffect(() => {
     getMember()
+    getStatus()
 
     socket.on(`quit-conversation-${conversationId}`, handleUserQuit)
     socket.on(`new-member-conversation-${conversationId}`, getMember)
@@ -67,6 +71,15 @@ export default function Members({
     } catch (error) {
       toast.error('Server error')
     }
+  }
+
+  const getStatus = async () => {
+    try {
+      const data: any = await getRequest(
+        `/conversation/${conversationId}/status`
+      )
+      setStatus(data)
+    } catch (error) {}
   }
 
   useEffect(() => {
@@ -190,11 +203,15 @@ export default function Members({
             placeholder="Search member..."
             className="grow"
           />
-          <GrayBackGroundButtom
-            title=""
-            prefixIcon={addUser}
-            onClick={openPopup}
-          />
+          {(currentUser.id === chiefId ||
+            viceChiefsId.includes(currentUser.id) ||
+            status === ConversationStatus.PUBLIC) && (
+            <GrayBackGroundButtom
+              title=""
+              prefixIcon={addUser}
+              onClick={openPopup}
+            />
+          )}
         </div>
         <div>
           {sortMembers.map((user) => (

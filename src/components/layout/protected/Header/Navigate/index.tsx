@@ -2,6 +2,7 @@ import home from '~/public/icons/layout/header/home.svg'
 import homeActive from '~/public/icons/layout/header/home_active.svg'
 import friend from '~/public/icons/layout/header/friend.svg'
 import friendActive from '~/public/icons/layout/header/friend_active.svg'
+import develop from '~/public/icons/layout/header/develop.svg'
 import NavigateItem from './NavigateItem'
 
 export default function Navigate() {
@@ -15,16 +16,18 @@ export default function Navigate() {
         activeIcon={friendActive}
       />
       <NavigateItem
-        href="/friends"
-        alt="Friends"
-        icon={friend}
-        activeIcon={friendActive}
+        href="/"
+        alt="develop"
+        icon={develop}
+        activeIcon={develop}
+        developing
       />
       <NavigateItem
-        href="/friends"
-        alt="Friends"
-        icon={friend}
-        activeIcon={friendActive}
+        href="/"
+        alt="develop"
+        icon={develop}
+        activeIcon={develop}
+        developing
       />
     </div>
   )

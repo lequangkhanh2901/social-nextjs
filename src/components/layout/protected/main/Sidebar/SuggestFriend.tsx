@@ -18,7 +18,8 @@ export default function SuggestFriend() {
     ;(async () => {
       const data: any = await getRequest('/friend/of-friends', {
         params: {
-          limit: 10
+          limit: 10,
+          excludeRequestFriend: true
           // skip: (pages.same - 1) * 10
         }
       })
