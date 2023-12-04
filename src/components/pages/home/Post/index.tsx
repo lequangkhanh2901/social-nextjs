@@ -6,10 +6,12 @@ import { toast } from 'react-hot-toast'
 
 import { Post } from '~/helper/type/common'
 import { Post as IPost } from '~/helper/type/common'
+import useClickOutSide from '~/helper/hooks/useClickOutSide'
 import { useLanguageContext } from '~/components/layout/Wrapper'
 import { getDictionary } from '~/locales'
 import usePopup from '~/helper/hooks/usePopup'
 import { deleteRequest } from '~/services/client/deleteRequest'
+import { getRequest } from '~/services/client/getRequest'
 import { useAppSelector } from '~/redux/hooks'
 import { RootState } from '~/redux/store'
 
@@ -28,7 +30,7 @@ import Actions from './Actions'
 import UpdatePost from './UpdatePost'
 import Share from './Share'
 import MediasPreview from './MediasPreview'
-import { getRequest } from '~/services/client/getRequest'
+import UserLikePost from './UserLikePost'
 
 interface Props {
   post: Post
@@ -37,11 +39,13 @@ interface Props {
 
 export default function Post({ post, setPosts }: Props) {
   const contentRef = useRef<HTMLDivElement>(null)
+  const userLikeRef = useRef<HTMLDivElement>(null)
   const [isViewAll, setIsViewAll] = useState(false)
   const { isShow, openPopup, closePopup } = usePopup()
   const updatePopup = usePopup()
   const sharePopup = usePopup()
   const reportPopup = usePopup()
+  const userLikePopup = usePopup()
   const { currentUser } = useAppSelector((state: RootState) => state.user)
 
   useEffect(() => {
@@ -52,6 +56,14 @@ export default function Post({ post, setPosts }: Props) {
       }
     }
   }, [contentRef.current])
+
+  useClickOutSide(
+    () => {
+      if (userLikePopup.isShow) userLikePopup.closePopup()
+    },
+    userLikeRef,
+    [userLikePopup.isShow]
+  )
 
   const { lang } = useLanguageContext()
   const { tHome } = getDictionary(lang)
@@ -198,9 +210,14 @@ export default function Post({ post, setPosts }: Props) {
         </div>
         <div className="py-1 border-y border-common-gray-light text-xs text-common-gray-dark flex gap-8">
           {post.likeData.total > 0 && (
-            <div className="flex">
+            <div
+              className="flex border-b border-common-white hover:border-common-gray-dark cursor-pointer relative"
+              onClick={userLikePopup.togglePopup}
+              ref={userLikeRef}
+            >
               <Image src={likeActive} alt="" width={14} />
               {post.likeData.total}
+              {userLikePopup.isShow && <UserLikePost postId={post.id} />}
             </div>
           )}
           {post.totalComment > 0 && (

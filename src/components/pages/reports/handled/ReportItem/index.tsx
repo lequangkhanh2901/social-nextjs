@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { AcceptAction, ReportReason } from '~/helper/enum/report'
+import { AcceptAction, ReportReason, ResolveStatus } from '~/helper/enum/report'
 import { IUser } from '~/helper/type/user'
 
 import Avatar from '~/components/common/Avatar'
@@ -10,8 +10,9 @@ export interface Report {
   note: string
   user: IUser
   userTarget: IUser
+  status: Exclude<ResolveStatus, ResolveStatus.NONE>
   type: 'POST' | 'COMMENT'
-  actions: AcceptAction[]
+  actions: AcceptAction[] | null
   updatedAt: string
 }
 
@@ -20,6 +21,7 @@ export default function ReportItem({
   note,
   user,
   userTarget,
+  status,
   type,
   actions,
   updatedAt
@@ -39,8 +41,12 @@ export default function ReportItem({
       <div className="border-r py-2 col-span-2 text-sm whitespace-normal">
         {note}
       </div>
-      <div className="col-span-2 border-r">
-        {actions.map((action) => (
+      <div
+        className={`col-span-2 border-r ${
+          status === ResolveStatus.REJECTED ? 'bg-common-warn' : ''
+        }`}
+      >
+        {actions?.map((action) => (
           <p key={action}>{action}</p>
         ))}
       </div>
